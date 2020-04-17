@@ -3,6 +3,7 @@ function love.conf(t)
     t.window.height = 768
     t.version = "11.3"
     t.window.title = "Everyday Magic"
+    t.window.resizable = true
     t.window.borderless = false
     t.window.vsync = 1
     t.window.highdpi = true
