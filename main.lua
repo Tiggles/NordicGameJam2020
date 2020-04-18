@@ -7,10 +7,13 @@ local next_action_allowed = 0
 local store
 local witch_front
 local witch_back
+local garden
+local potions = {}
 local response_bubble
 local customer_sprites = {}
+local customer_head
 local responses = {
-    accept = { "I have just the thing", "Follow me", "Sure, this way" },
+    accept = { "I have just the thing", "Maybe this is for you?", "Sure, take this." },
     postpone = { "I'm out of ingredients, can you come back later?", "Sorry, but we're out for now."},
     decline = {"I don't have anything for that, sorry.", "Hmm, no. Sorry."}
 }
@@ -20,26 +23,35 @@ local game_state = {
     finished_customers = {},
     postponed_customers = {},
     paused = false,
-    clock = { 10, 0},
+    clock = {10, 0},
     queued_response = {
         accept = responses.accept[love.math.random(#responses.accept)],
         postpone = responses.postpone[love.math.random(#responses.postpone)],
         decline = responses.decline[love.math.random(#responses.decline)]
-    }
+    },
+    cauldrons = {},
+    money = 200
 }
 
-local accept_box = {x = 500, y = 200, width = 345, height = 60}
-local postpone_box = {x = 500, y = accept_box.y + accept_box.height + 15, width = 345, height = 60}
-local decline_box = {x = 500, y = postpone_box.y + postpone_box.height + 15, width = 345, height = 60}
+local accept_box = {x = 500, y = 100, width = 345, height = 55}
+local postpone_box = {x = 500, y = accept_box.y + accept_box.height + 15, width = 345, height = 55}
+local decline_box = {x = 500, y = postpone_box.y + postpone_box.height + 15, width = 345, height = 55}
 
 local update = function() end
 local draw = function() end
 
 function love.load()
+    love.graphics.setDefaultFilter( "nearest", "nearest")
     store = love.graphics.newImage("Assets/store.png")
     witch_front = love.graphics.newImage("Assets/witch_front.png")
     witch_back = love.graphics.newImage("Assets/witch_back.png")
     response_bubble = love.graphics.newImage("Assets/response_bubble.png")
+    customer_head = love.graphics.newImage("Assets/customer_head.png")
+    garden = love.graphics.newImage("Assets/garden.png")
+    potions.strength = love.graphics.newImage("Assets/potion_strength.png")
+    potions.speed = love.graphics.newImage("Assets/potion_speed.png")
+    potions.nightvision = love.graphics.newImage("Assets/potion_nightvision.png")
+    potions.underwater = love.graphics.newImage("Assets/potion_underwater.png")
     table.insert(customer_sprites, love.graphics.newImage("Assets/customer_blue.png"))
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
@@ -92,20 +104,22 @@ function love.draw()
     end
 
     if active_customer then
-        
+        local power = game_state.customers[1]:get_power()
+
         love.graphics.draw(response_bubble, accept_box.x, accept_box.y)
         love.graphics.draw(response_bubble, postpone_box.x, postpone_box.y)
         love.graphics.draw(response_bubble, decline_box.x, decline_box.y)
+        love.graphics.draw(customer_head, 510, 30)
 
         love.graphics.setColor(0, 0, 0)
-        love.graphics.print(game_state.customers[1]:get_line(), 550, 50, 0)
+        love.graphics.print(game_state.customers[1]:get_line(), 580, 40, 0)
         if debug then
             love.graphics.rectangle("line", accept_box.x, accept_box.y, accept_box.width, accept_box.height)
             love.graphics.rectangle("line", postpone_box.x, postpone_box.y, postpone_box.width, postpone_box.height)
             love.graphics.rectangle("line", decline_box.x, decline_box.y, decline_box.width, decline_box.height)
         end
 
-        love.graphics.print(game_state.queued_response.accept, accept_box.x + 25, accept_box.y + 22)
+        love.graphics.print(game_state.queued_response.accept .. " (" .. game_state.customers[1]:get_power() .. ")", accept_box.x + 25, accept_box.y + 22)
         love.graphics.print(game_state.queued_response.postpone , postpone_box.x + 25, postpone_box.y + 22)
         love.graphics.print(game_state.queued_response.decline, decline_box.x + 25, decline_box.y + 22)
         love.graphics.setColor(1, 1, 1)

@@ -17,5 +17,5 @@ function Customer:get_line()
 end
 
 function Customer:get_power()
-    return self.request.power
+    return self.request.requested_powers
 end
