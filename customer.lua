@@ -7,5 +7,5 @@ function Customer:new_customer()
         request = Request:new()
     }
     self.__index = self
-    return setmetatable(Customer, self)
+    return setmetatable(new_customer, self)
 end
