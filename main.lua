@@ -9,18 +9,27 @@ local witch_front
 local witch_back
 local speech_bubble
 local customer_sprites = {}
-local game_state = {
-    inventory = Inventory:new(),
-    customers = {},
-    finished_customers = {},
-    paused = false
-}
-
 local responses = {
     accept = { "I have just the thing", "Follow me", "Sure, this way" },
     postpone = { "I'm out of ingredients, \ncan you come back\nlater?", "Sorry, but we're out for now."},
     decline = {"I don't have anything \nfor that, sorry.", "Hmm, no. Sorry."}
 }
+local game_state = {
+    inventory = Inventory:new(),
+    customers = {},
+    finished_customers = {},
+    paused = false,
+    clock = { 10, 0},
+    queued_response = {
+        accept = responses.accept[love.math.random(#responses.accept)],
+        postpone = responses.postpone[love.math.random(#responses.postpone)],
+        decline = responses.decline[love.math.random(#responses.decline)]
+    }
+}
+
+local accept_box = {x = 485, y = 200, width = 375, height = 80}
+local postpone_box = {x = 485, y = accept_box.y + accept_box.height + 15, width = 375, height = 80}
+local decline_box = {x = 485, y = postpone_box.y + postpone_box.height + 15, width = 375, height = 80}
 
 local update = function() end
 local draw = function() end
@@ -34,7 +43,6 @@ function love.load()
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
-    -- love.graphics.setColor(0, 0, 0)
 end
 
 function love.update(delta)
@@ -56,37 +64,25 @@ end
 
 function love.draw()
     local active_customer = game_state.customers[1] ~= nil
-    -- Draw shop
     love.graphics.draw(concept_store)
-    -- Draw player
 
-    for i = #game_state.customers, 1, -1 do
+    for i = 1, #game_state.customers do
         local c = game_state.customers[i]
-        love.graphics.draw(customer_sprites[c.color], 285, 260 - i * 60, 0, 4, 4)
+        love.graphics.draw(customer_sprites[c.color], 190, 220 + i * 60, 0, 4, 4)
     end
 
-
-    if active_customer then -- should be (game_state.active_customer)
-        love.graphics.draw(speech_bubble, 5, 5, 0, 6, 4)
-        -- Accept box
-        love.graphics.draw(speech_bubble, 400, 200, 0, 3, 1)
-        -- Postpone box
-        love.graphics.draw(speech_bubble, 400, 300, 0, 3, 1)
-        -- Decline box
-        love.graphics.draw(speech_bubble, 400, 250, 0, 3, 1)
+    if active_customer then
         love.graphics.setColor(0, 0, 0)
-        love.graphics.print(responses.accept[1], 410, 215)
-        love.graphics.print(responses.postpone[1], 410, 255)
-        love.graphics.print(responses.decline[1], 410, 315)
-        love.graphics.print(game_state.customers[1]:get_line(), 30, 50, 0)
+        love.graphics.print(game_state.customers[1]:get_line(), 550, 50, 0)
         love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("line", accept_box.x, accept_box.y, accept_box.width, accept_box.height)
+        love.graphics.rectangle("line", postpone_box.x, postpone_box.y, postpone_box.width, postpone_box.height)
+        love.graphics.rectangle("line", decline_box.x, decline_box.y, decline_box.width, decline_box.height)
     end
-
-    love.graphics.draw(witch_back, 240, 430, 0, 3, 3)
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
 end
 
-function dialog_update()
+local function dialog_update()
 
 end

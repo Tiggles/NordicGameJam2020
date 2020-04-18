@@ -25,7 +25,7 @@ local speed_lines = {
 }
 
 local nightvision_lines = {
-    "Somebody is pooping in my yard at night,\n and I want to catch them."
+    "Somebody is pooping in my yard at night,\nand I want to catch them."
 }
 
 local endurance_lines = {
