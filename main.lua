@@ -121,19 +121,17 @@ function is_colliding(point, box)
 end
 
 function draw_inventory()
-    love.graphics.draw(potions.strength, 560, 360)
-    love.graphics.draw(potions.speed, 740, 360)
-    love.graphics.draw(potions.nightvision, 560, 450)
-    love.graphics.draw(potions.endurance, 740, 450)
-    love.graphics.draw(potions.underwater, 650, 550)
+    love.graphics.draw(potions.strength, 540, 375, 0, 3, 3)
+    love.graphics.draw(potions.speed, 720, 375, 0, 3, 3)
+    love.graphics.draw(potions.nightvision, 540, 470, 0, 3, 3)
+    love.graphics.draw(potions.endurance, 720, 470, 0, 3, 3)
+    love.graphics.draw(potions.underwater, 630, 560, 0, 3, 3)
 
-    love.graphics.setColor(0, 0, 0)
     love.graphics.print(game_state.inventory:get_strength(), 600, 382)
     love.graphics.print(game_state.inventory:get_speed(), 780, 382)
     love.graphics.print(game_state.inventory:get_nightvision(), 600, 472)
     love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
     love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
-    love.graphics.setColor(1, 1, 1)
 end
 
 function draw_conversation(active_customer)
