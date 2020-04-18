@@ -7,7 +7,7 @@ local next_action_allowed = 0
 local store
 local witch_front
 local witch_back
-local speech_bubble
+local response_bubble
 local customer_sprites = {}
 local responses = {
     accept = { "I have just the thing", "Follow me", "Sure, this way" },
@@ -39,7 +39,7 @@ function love.load()
     store = love.graphics.newImage("Assets/store.png")
     witch_front = love.graphics.newImage("Assets/witch_front.png")
     witch_back = love.graphics.newImage("Assets/witch_back.png")
-    speech_bubble = love.graphics.newImage("Assets/speech_bubble.png")
+    response_bubble = love.graphics.newImage("Assets/response_bubble.png")
     table.insert(customer_sprites, love.graphics.newImage("Assets/customer_blue.png"))
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
@@ -72,7 +72,7 @@ function love.update(delta)
             table.remove(game_state.customers, 1)
             next_action_allowed = love.timer.getTime() + 0.2
         else
-            print("--------------------------")
+            print("None")
         end
     end
     -- At start of day, calculate when customers appear
@@ -92,6 +92,11 @@ function love.draw()
     end
 
     if active_customer then
+        
+        love.graphics.draw(response_bubble, accept_box.x, accept_box.y)
+        love.graphics.draw(response_bubble, postpone_box.x, postpone_box.y)
+        love.graphics.draw(response_bubble, decline_box.x, decline_box.y)
+
         love.graphics.setColor(0, 0, 0)
         love.graphics.print(game_state.customers[1]:get_line(), 550, 50, 0)
         if debug then
@@ -99,9 +104,10 @@ function love.draw()
             love.graphics.rectangle("line", postpone_box.x, postpone_box.y, postpone_box.width, postpone_box.height)
             love.graphics.rectangle("line", decline_box.x, decline_box.y, decline_box.width, decline_box.height)
         end
-        love.graphics.print(game_state.queued_response.accept, accept_box.x + 5, accept_box.y + 10)
-        love.graphics.print(game_state.queued_response.postpone , postpone_box.x + 5, postpone_box.y + 10)
-        love.graphics.print(game_state.queued_response.decline, decline_box.x + 5, decline_box.y + 10)
+
+        love.graphics.print(game_state.queued_response.accept, accept_box.x + 25, accept_box.y + 22)
+        love.graphics.print(game_state.queued_response.postpone , postpone_box.x + 25, postpone_box.y + 22)
+        love.graphics.print(game_state.queued_response.decline, decline_box.x + 25, decline_box.y + 22)
         love.graphics.setColor(1, 1, 1)
     end
 
