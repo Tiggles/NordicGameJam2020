@@ -4,15 +4,15 @@ require "customer"
 local debug = false
 local next_action_allowed = 0
 
-local concept_store
+local store
 local witch_front
 local witch_back
 local speech_bubble
 local customer_sprites = {}
 local responses = {
     accept = { "I have just the thing", "Follow me", "Sure, this way" },
-    postpone = { "I'm out of ingredients, \ncan you come back\nlater?", "Sorry, but we're out for now."},
-    decline = {"I don't have anything \nfor that, sorry.", "Hmm, no. Sorry."}
+    postpone = { "I'm out of ingredients, can you come back later?", "Sorry, but we're out for now."},
+    decline = {"I don't have anything for that, sorry.", "Hmm, no. Sorry."}
 }
 local game_state = {
     inventory = Inventory:new(),
@@ -28,15 +28,15 @@ local game_state = {
     }
 }
 
-local accept_box = {x = 485, y = 200, width = 375, height = 80}
-local postpone_box = {x = 485, y = accept_box.y + accept_box.height + 15, width = 375, height = 80}
-local decline_box = {x = 485, y = postpone_box.y + postpone_box.height + 15, width = 375, height = 80}
+local accept_box = {x = 485, y = 200, width = 375, height = 60}
+local postpone_box = {x = 485, y = accept_box.y + accept_box.height + 15, width = 375, height = 60}
+local decline_box = {x = 485, y = postpone_box.y + postpone_box.height + 15, width = 375, height = 60}
 
 local update = function() end
 local draw = function() end
 
 function love.load()
-    concept_store = love.graphics.newImage("Assets/store.jpg")
+    store = love.graphics.newImage("Assets/store.png")
     witch_front = love.graphics.newImage("Assets/witch_front.png")
     witch_back = love.graphics.newImage("Assets/witch_back.png")
     speech_bubble = love.graphics.newImage("Assets/speech_bubble.png")
@@ -84,7 +84,7 @@ end
 
 function love.draw()
     local active_customer = game_state.customers[1] ~= nil
-    love.graphics.draw(concept_store)
+    love.graphics.draw(store, 0, 0, 0, 4, 4)
 
     for i = 1, #game_state.customers do
         local c = game_state.customers[i]
