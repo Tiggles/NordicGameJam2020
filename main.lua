@@ -28,9 +28,9 @@ local game_state = {
     }
 }
 
-local accept_box = {x = 485, y = 200, width = 375, height = 60}
-local postpone_box = {x = 485, y = accept_box.y + accept_box.height + 15, width = 375, height = 60}
-local decline_box = {x = 485, y = postpone_box.y + postpone_box.height + 15, width = 375, height = 60}
+local accept_box = {x = 500, y = 200, width = 345, height = 60}
+local postpone_box = {x = 500, y = accept_box.y + accept_box.height + 15, width = 345, height = 60}
+local decline_box = {x = 500, y = postpone_box.y + postpone_box.height + 15, width = 345, height = 60}
 
 local update = function() end
 local draw = function() end
@@ -84,7 +84,7 @@ end
 
 function love.draw()
     local active_customer = game_state.customers[1] ~= nil
-    love.graphics.draw(store, 0, 0, 0, 4, 4)
+    love.graphics.draw(store, 0, 0, 0, 3, 3)
 
     for i = 1, #game_state.customers do
         local c = game_state.customers[i]
@@ -94,7 +94,6 @@ function love.draw()
     if active_customer then
         love.graphics.setColor(0, 0, 0)
         love.graphics.print(game_state.customers[1]:get_line(), 550, 50, 0)
-        love.graphics.setColor(1, 1, 1)
         if debug then
             love.graphics.rectangle("line", accept_box.x, accept_box.y, accept_box.width, accept_box.height)
             love.graphics.rectangle("line", postpone_box.x, postpone_box.y, postpone_box.width, postpone_box.height)
@@ -103,6 +102,7 @@ function love.draw()
         love.graphics.print(game_state.queued_response.accept, accept_box.x + 5, accept_box.y + 10)
         love.graphics.print(game_state.queued_response.postpone , postpone_box.x + 5, postpone_box.y + 10)
         love.graphics.print(game_state.queued_response.decline, decline_box.x + 5, decline_box.y + 10)
+        love.graphics.setColor(1, 1, 1)
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
