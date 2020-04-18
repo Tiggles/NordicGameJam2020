@@ -2,10 +2,16 @@ require "request"
 
 
 Customer = {}
-function Customer:new_customer()
+function Customer:new()
     local new_customer = {
-        request = Request:new()
+        request = Request:new(),
+        color = math.random(1),
+        served = false
     }
     self.__index = self
     return setmetatable(new_customer, self)
+end
+
+function Customer:get_line()
+    return self.request:get_line()
 end
