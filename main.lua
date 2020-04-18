@@ -18,6 +18,7 @@ local game_state = {
     inventory = Inventory:new(),
     customers = {},
     finished_customers = {},
+    postponed_customers = {},
     paused = false,
     clock = { 10, 0},
     queued_response = {
@@ -63,6 +64,8 @@ function love.update(delta)
             next_action_allowed = love.timer.getTime() + 0.2
         elseif is_colliding({x=x, y=y}, postpone_box) then
             print("Postpone")
+            table.insert(game_state.postponed_customers, game_state.customers[1])
+            table.remove(game_state.customers, 1)
             next_action_allowed = love.timer.getTime() + 0.2
         elseif is_colliding({x=x, y=y}, decline_box) then
             print("Decline")
