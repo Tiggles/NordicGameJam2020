@@ -52,6 +52,7 @@ function love.load()
     potions.speed = love.graphics.newImage("Assets/potion_speed.png")
     potions.nightvision = love.graphics.newImage("Assets/potion_nightvision.png")
     potions.underwater = love.graphics.newImage("Assets/potion_underwater.png")
+    potions.endurance = love.graphics.newImage("Assets/potion_endurance.png")
     table.insert(customer_sprites, love.graphics.newImage("Assets/customer_blue.png"))
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
@@ -72,7 +73,12 @@ function love.update(delta)
     if active_customer and next_action_allowed < love.timer.getTime() and love.mouse.isDown("1") then
         local x, y = love.mouse.getPosition()
         if is_colliding({x = x, y = y}, accept_box) then
-            print("Accept")
+            local power = game_state.customers[1]:get_power()
+            local remaining_potions = get_remaining_potions(power)
+            if remaining_potions ~= 0 then
+                game_state.inventory:use_potion(power)
+                table.remove(game_state.customers, 1)
+            end
             next_action_allowed = love.timer.getTime() + 0.2
         elseif is_colliding({x=x, y=y}, postpone_box) then
             print("Postpone")
@@ -103,10 +109,42 @@ function love.draw()
         love.graphics.draw(customer_sprites[c.color], 190, 220 + i * 60, 0, 4, 4)
     end
 
+    draw_conversation(active_customer)
+
+    draw_inventory()
+
+    if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
+end
+
+function is_colliding(point, box)
+    return point.x > box.x and point.x < box.width + box.x and point.y > box.y and point.y < box.y + box.height
+end
+
+function draw_inventory()
+    love.graphics.draw(potions.strength, 560, 360)
+    love.graphics.draw(potions.speed, 740, 360)
+    love.graphics.draw(potions.nightvision, 560, 450)
+    love.graphics.draw(potions.endurance, 740, 450)
+    love.graphics.draw(potions.underwater, 650, 550)
+
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print(game_state.inventory:get_strength(), 600, 382)
+    love.graphics.print(game_state.inventory:get_speed(), 780, 382)
+    love.graphics.print(game_state.inventory:get_nightvision(), 600, 472)
+    love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
+    love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
+    love.graphics.setColor(1, 1, 1)
+end
+
+function draw_conversation(active_customer)
     if active_customer then
         local power = game_state.customers[1]:get_power()
-
+        local remaining_potions = get_remaining_potions(power)
+        if remaining_potions == 0 then
+            love.graphics.setColor(0.6, 0.6, 0.6)
+        end
         love.graphics.draw(response_bubble, accept_box.x, accept_box.y)
+        love.graphics.setColor(1, 1, 1)
         love.graphics.draw(response_bubble, postpone_box.x, postpone_box.y)
         love.graphics.draw(response_bubble, decline_box.x, decline_box.y)
         love.graphics.draw(customer_head, 510, 30)
@@ -124,12 +162,20 @@ function love.draw()
         love.graphics.print(game_state.queued_response.decline, decline_box.x + 25, decline_box.y + 22)
         love.graphics.setColor(1, 1, 1)
     end
-
-    if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
 end
 
-function is_colliding(point, box)
-    return point.x > box.x and point.x < box.width + box.x and point.y > box.y and point.y < box.y + box.height
+function get_remaining_potions(power)
+    if power == "Speed" then
+        return game_state.inventory:get_speed()
+    elseif power == "Strength" then
+        return game_state.inventory:get_strength()
+    elseif power == "Underwater Breathing" then
+        return game_state.inventory:get_underwater_breathing()
+    elseif power == "Night Vision" then
+        return game_state.inventory:get_nightvision()
+    elseif power == "Endurance" then
+        return game_state.inventory:get_endurance()
+    end
 end
 
 local function dialog_update()
