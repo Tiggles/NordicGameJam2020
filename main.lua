@@ -66,6 +66,7 @@ function love.update(delta)
             next_action_allowed = love.timer.getTime() + 0.2
         elseif is_colliding({x=x, y=y}, decline_box) then
             print("Decline")
+            table.remove(game_state.customers, 1)
             next_action_allowed = love.timer.getTime() + 0.2
         else
             print("--------------------------")
@@ -96,6 +97,9 @@ function love.draw()
             love.graphics.rectangle("line", postpone_box.x, postpone_box.y, postpone_box.width, postpone_box.height)
             love.graphics.rectangle("line", decline_box.x, decline_box.y, decline_box.width, decline_box.height)
         end
+        love.graphics.print(game_state.queued_response.accept, accept_box.x + 5, accept_box.y + 10)
+        love.graphics.print(game_state.queued_response.postpone , postpone_box.x + 5, postpone_box.y + 10)
+        love.graphics.print(game_state.queued_response.decline, decline_box.x + 5, decline_box.y + 10)
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
