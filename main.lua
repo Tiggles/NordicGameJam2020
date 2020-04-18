@@ -18,15 +18,15 @@ local game_state = {
 
 local responses = {
     accept = { "I have just the thing", "Follow me", "Sure, this way" },
-    postpone = { "I'm out of ingredients, can you come back later?", "Sorry, but we're out for now."},
-    decline = {"I don't have anything for that, sorry.", "Hmm, no. Sorry."}
+    postpone = { "I'm out of ingredients, \ncan you come back\nlater?", "Sorry, but we're out for now."},
+    decline = {"I don't have anything \nfor that, sorry.", "Hmm, no. Sorry."}
 }
 
 local update = function() end
 local draw = function() end
 
 function love.load()
-    concept_store = love.graphics.newImage("Assets/concept.jpg")
+    concept_store = love.graphics.newImage("Assets/store.jpg")
     witch_front = love.graphics.newImage("Assets/witch_front.png")
     witch_back = love.graphics.newImage("Assets/witch_back.png")
     speech_bubble = love.graphics.newImage("Assets/speech_bubble.png")
@@ -57,7 +57,7 @@ end
 function love.draw()
     local active_customer = game_state.customers[1] ~= nil
     -- Draw shop
-    love.graphics.draw(concept_store, 0, 0, 0, 1.258, 1.2)
+    love.graphics.draw(concept_store)
     -- Draw player
 
     for i = #game_state.customers, 1, -1 do
@@ -76,7 +76,7 @@ function love.draw()
         love.graphics.draw(speech_bubble, 400, 250, 0, 3, 1)
         love.graphics.setColor(0, 0, 0)
         love.graphics.print(responses.accept[1], 410, 215)
-        love.graphics.print(responses.postpone[1], 410, 265)
+        love.graphics.print(responses.postpone[1], 410, 255)
         love.graphics.print(responses.decline[1], 410, 315)
         love.graphics.print(game_state.customers[1]:get_line(), 30, 50, 0)
         love.graphics.setColor(1, 1, 1)

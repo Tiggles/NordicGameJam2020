@@ -50,7 +50,6 @@ end
 
 function Request:new()
     local power = POWERS[love.math.random(#POWERS)]
-    print(power)
     local request = {
         requested_powers = power,
         line = lines_from_power(power)

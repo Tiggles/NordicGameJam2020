@@ -1,6 +1,6 @@
 function love.conf(t)
-    t.window.width = 800
-    t.window.height = 600
+    t.window.width = 864
+    t.window.height = 672
     t.version = "11.3"
     t.window.title = "Everyday Magic"
     t.window.resizable = false
