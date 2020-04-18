@@ -2,7 +2,7 @@ require "inventory"
 require "customer"
 
 local debug = false
-local next_debug_toggle = 0
+local next_action_allowed = 0
 
 local concept_store
 local witch_front
@@ -48,13 +48,29 @@ end
 function love.update(delta)
     if game_state.paused then return end
     if love.keyboard.isDown("escape") then love.event.quit() end
-    if love.keyboard.isDown("f4") and next_debug_toggle < love.timer.getTime() then
+    if love.keyboard.isDown("f4") and next_action_allowed < love.timer.getTime() then
         debug = not debug
-        next_debug_toggle = love.timer.getTime() + 0.2
+        next_action_allowed = love.timer.getTime() + 0.2
     end
 
     local active_customer = game_state.customers[1] ~= nil
     update()
+
+    if active_customer and next_action_allowed < love.timer.getTime() and love.mouse.isDown("1") then
+        local x, y = love.mouse.getPosition()
+        if is_colliding({x = x, y = y}, accept_box) then
+            print("Accept")
+            next_action_allowed = love.timer.getTime() + 0.2
+        elseif is_colliding({x=x, y=y}, postpone_box) then
+            print("Postpone")
+            next_action_allowed = love.timer.getTime() + 0.2
+        elseif is_colliding({x=x, y=y}, decline_box) then
+            print("Decline")
+            next_action_allowed = love.timer.getTime() + 0.2
+        else
+            print("--------------------------")
+        end
+    end
     -- At start of day, calculate when customers appear
 
     -- skip time faster if no customers present
@@ -75,12 +91,18 @@ function love.draw()
         love.graphics.setColor(0, 0, 0)
         love.graphics.print(game_state.customers[1]:get_line(), 550, 50, 0)
         love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", accept_box.x, accept_box.y, accept_box.width, accept_box.height)
-        love.graphics.rectangle("line", postpone_box.x, postpone_box.y, postpone_box.width, postpone_box.height)
-        love.graphics.rectangle("line", decline_box.x, decline_box.y, decline_box.width, decline_box.height)
+        if debug then
+            love.graphics.rectangle("line", accept_box.x, accept_box.y, accept_box.width, accept_box.height)
+            love.graphics.rectangle("line", postpone_box.x, postpone_box.y, postpone_box.width, postpone_box.height)
+            love.graphics.rectangle("line", decline_box.x, decline_box.y, decline_box.width, decline_box.height)
+        end
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
+end
+
+function is_colliding(point, box)
+    return point.x > box.x and point.x < box.width + box.x and point.y > box.y and point.y < box.y + box.height
 end
 
 local function dialog_update()
