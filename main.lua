@@ -256,7 +256,6 @@ function love.load()
 end
 
 function love.update(delta)
-    print(message.expiration)
     if game_state.current_location == "menu" then
         if love.mouse.isDown("1") and next_action_allowed < love.timer.getTime()  then
             local x, y = love.mouse.getPosition()
@@ -295,7 +294,7 @@ function love.update(delta)
         if game_state.customers[i].time_bonus <= 0 then
             table.remove(game_state.customers, i)
             message.message = CUSTOMER_LEFT
-            message.expiration = 1
+            message.expiration = 1.5
         end
     end
 
@@ -680,7 +679,10 @@ function love.draw()
             love.graphics.draw(customer_sprites[c.color], 190, 220 + i * 60, 0, 4, 4)
         end
 
-        -- love.graphics.print(game_state.clock:to_string())
+        love.graphics.setColor(0,0,0)
+        love.graphics.rectangle("fill", 380, 550, 100, 20)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print(game_state.clock:to_string(), 388, 553)
 
         draw_conversation(active_customer)
         draw_inventory()
@@ -689,7 +691,7 @@ function love.draw()
         if message.message ~= "" and message.expiration > 0 then
             love.graphics.draw(help.small_message, 350, 580)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.print(message.message, 350, 595)
+            love.graphics.print(message.message, 355, 600)
             love.graphics.setColor(1, 1, 1)
         end
     elseif game_state.current_location == "garden" then
@@ -712,6 +714,11 @@ function love.draw()
         else
             love.mouse.setCursor(arrow_cursor)
         end
+
+        love.graphics.setColor(0,0,0)
+        love.graphics.rectangle("fill", 280, 0, 100, 20)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print(game_state.clock:to_string(), 280, 3)
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end

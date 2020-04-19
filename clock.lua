@@ -40,7 +40,7 @@ local function pad(val, threshold, padding_char)
 end
 
 function Clock:to_string()
-    return self.week .. " ".. days[self.day].. " " .. pad(math.floor(self.hours), 10, "0") .. ":" .. pad(math.floor(self.minutes), 10, "0")
+    return days[self.day].. " " .. pad(math.floor(self.hours), 10, "0") .. ":" .. pad(math.floor(self.minutes), 10, "0")
 end
 
 function Clock:is_open()
