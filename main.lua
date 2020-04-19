@@ -1,6 +1,7 @@
 require "inventory"
 require "customer"
 require "clock"
+require "help"
 
 local debug = false
 local next_action_allowed = 0
@@ -17,7 +18,7 @@ local response_bubble
 local customer_sprites = {}
 local customer_head
 local responses = {
-    accept = { "I have just the thing", "Maybe this is for you?", "Sure, take this." },
+    accept = { "I have just the thing.", "Maybe this is for you?", "Take this." },
     postpone = { "I'm out of ingredients, can you come back later?", "Sorry, but we're out for now."},
     decline = {"I don't have anything for that, sorry.", "Hmm, no. Sorry."}
 }
@@ -27,7 +28,7 @@ local game_state = {
     finished_customers = {},
     postponed_customers = {},
     paused = false,
-    clock = Clock:new(10, 18, 10, 0, 120),
+    clock = Clock:new(10, 18, 10, 0, 20),
     queued_response = {
         accept = responses.accept[love.math.random(#responses.accept)],
         postpone = responses.postpone[love.math.random(#responses.postpone)],
@@ -107,6 +108,7 @@ function love.update(delta)
 
         if love.mouse.isDown("1") then
             local x, y = love.mouse.getPosition()
+            local action_happened = false
             if active_customer and next_action_allowed < love.timer.getTime() then
                 if is_colliding({x = x, y = y}, accept_box) then
                     local power = game_state.customers[1]:get_power()
@@ -115,18 +117,29 @@ function love.update(delta)
                         game_state.inventory:use_potion(power)
                         table.remove(game_state.customers, 1)
                     end
+                    action_happened = true
                     next_action_allowed = love.timer.getTime() + 0.2
                 elseif is_colliding({x=x, y=y}, postpone_box) and game_state.customers[1].already_postponed == false then
                     table.insert(game_state.postponed_customers, game_state.customers[1])
                     table.remove(game_state.customers, 1)
                     game_state.postponed_customers[#game_state.postponed_customers].week = game_state.clock.week + 1
                     game_state.postponed_customers[#game_state.postponed_customers].day = game_state.clock.day
+                    action_happened = true
                     next_action_allowed = love.timer.getTime() + 0.2
                 elseif is_colliding({x=x, y=y}, decline_box) then
                     table.remove(game_state.customers, 1)
+                    action_happened = true
                     next_action_allowed = love.timer.getTime() + 0.2
                 else
                     print("None")
+                end
+
+                if action_happened then
+                    game_state.queued_response = {
+                        accept = responses.accept[love.math.random(#responses.accept)],
+                        postpone = responses.postpone[love.math.random(#responses.postpone)],
+                        decline = responses.decline[love.math.random(#responses.decline)]
+                    }
                 end
             end
             if is_colliding({x=x, y=y}, goto_garden_button) then
@@ -175,6 +188,7 @@ function love.draw()
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
+    love.graphics.print(HELP_SHOP)
 end
 
 function is_colliding(point, box)
@@ -182,7 +196,7 @@ function is_colliding(point, box)
 end
 
 function draw_inventory()
-    if game_state.inventory.page == 1 then
+    if game_state.inventory.page == 1 then -- potions
         love.graphics.draw(potions.strength, 540, 375, 0, 3, 3)
         love.graphics.draw(potions.speed, 720, 375, 0, 3, 3)
         love.graphics.draw(potions.nightvision, 540, 470, 0, 3, 3)
@@ -194,6 +208,8 @@ function draw_inventory()
         love.graphics.print(game_state.inventory:get_nightvision(), 600, 472)
         love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
         love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
+    else -- inventory
+
     end
 end
 
