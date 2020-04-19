@@ -9,6 +9,7 @@ function Inventory:new()
             nightvision_potions = 1,
             endurance_potions = 1
         },
+        money = 200,
         ingredients = {
 
         },
@@ -16,6 +17,18 @@ function Inventory:new()
     }
     self.__index = self
     return setmetatable(inventory, self)
+end
+
+function Inventory:add_money(amount)
+    self.money = self.money + math.floor(amount)
+end
+
+function Inventory:has_enough_money(to_spend)
+    return self.money >= to_spend
+end
+
+function Inventory:spend_money(amount)
+    self.money = math.max(self.money - amount, 0)
 end
 
 function Inventory:get_speed()

@@ -20,11 +20,19 @@ local response_bubble
 local ingredient_bubble
 local customer_sprites = {}
 local customer_head
+local spinach_cursor
+local coffee_cursor
+local cat_eyes_cursor
+local camel_hump_cursor
+local seaweed_cursor
+local arrow_cursor
 local responses = {
     accept = { "I have just the thing.", "Maybe this is for you?", "Take this." },
     postpone = { "I'm out of ingredients, can you come back later?", "Sorry, but we're out for now."},
     decline = {"I don't have anything for that, sorry.", "Hmm, no. Sorry."}
 }
+
+local potion_price = 150
 local game_state = {
     inventory = Inventory:new(),
     customers = {},
@@ -127,13 +135,20 @@ function love.update(delta)
         next_action_allowed = love.timer.getTime() + 0.2
     end
 
+    for i = #game_state.customers, 1, -1 do
+        game_state.customers[i].time_bonus = game_state.customers[i].time_bonus - (delta * 10)
+        if game_state.customers[i].time_bonus <= 0 then
+            table.remove(game_state.customers, i)
+        end
+    end
+
     local active_customer = game_state.customers[1] ~= nil
 
     if game_state.current_location == "store" or game_state.current_location == "garden" then
         game_state.clock:update(delta)
     end
 
-    if game_state.clock:is_open() and next_customer_allowed < love.timer.getTime() then
+    if game_state.clock:is_open() and next_customer_allowed < love.timer.getTime() and #game_state.customers < 5 then
         table.insert(game_state.customers, Customer:new())
         next_customer_allowed = love.timer.getTime() + 10 + math.random(6)
     end
@@ -166,6 +181,7 @@ function love.update(delta)
                     local remaining_potions = get_remaining_potions(power)
                     if remaining_potions ~= 0 then
                         game_state.inventory:use_potion(power)
+                        game_state.inventory:add_money(game_state.customers[1].time_bonus + potion_price)
                         table.remove(game_state.customers, 1)
                     end
                     action_happened = true
@@ -206,15 +222,15 @@ function love.update(delta)
                 game_state.current_location = "store"
                 selected_ingredient = nil
             elseif is_colliding({x=x, y=y}, spinach_button_box) then
-                selected_ingredient = "spinach" 
+                selected_ingredient = "spinach"
             elseif is_colliding({x=x, y=y}, coffee_button_box) then
-                selected_ingredient = "coffee" 
+                selected_ingredient = "coffee"
             elseif is_colliding({x=x, y=y}, cat_eyes_button_box) then
-                selected_ingredient = "cat_eyes" 
+                selected_ingredient = "cat_eyes"
             elseif is_colliding({x=x, y=y}, camel_hump_button_box) then
-                selected_ingredient = "camel_hump" 
+                selected_ingredient = "camel_hump"
             elseif is_colliding({x=x, y=y}, seaweed_button_box) then
-                selected_ingredient = "seaweed" 
+                selected_ingredient = "seaweed"
             else
                 local garden_plot_clicked = false
                 -- Check if colliding with plot
@@ -281,6 +297,7 @@ function love.draw()
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
+    love.graphics.print(game_state.inventory.money, 5, 20)
 end
 
 function is_colliding(point, box)
