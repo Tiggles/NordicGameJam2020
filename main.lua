@@ -49,9 +49,11 @@ local ingredients_prices = {
     camel_hump = 1000,
     seaweed = 0
 }
+local help = {}
 
 local potion_price = 150
 local game_state = {
+    help = Help:new(),
     inventory = Inventory:new(),
     customers = {},
     finished_customers = {},
@@ -111,6 +113,8 @@ local update = function() end
 local draw = function() end
 
 function love.load()
+    love.filesystem.setIdentity("screenshot_example")
+
     love.graphics.setDefaultFilter( "nearest", "nearest")
     store = love.graphics.newImage("Assets/store.png")
     store_closed = love.graphics.newImage("Assets/store_closed.png")
@@ -123,6 +127,11 @@ function love.load()
     arrow_left = love.graphics.newImage("Assets/arrow_left.png")
     arrow_right = love.graphics.newImage("Assets/arrow_right.png")
     coin = love.graphics.newImage("Assets/coin.png")
+
+    help.store = love.graphics.newImage("Assets/Help/store_help.png")
+    help.garden = love.graphics.newImage("Assets/Help/garden_help.png")
+    help.big_message = love.graphics.newImage("Assets/big_message.png")
+    help.small_message = love.graphics.newImage("Assets/small_message.png")
 
     potions.strength = love.graphics.newImage("Assets/potion_strength.png")
     potions.speed = love.graphics.newImage("Assets/potion_speed.png")
@@ -158,13 +167,20 @@ end
 function love.update(delta)
     if game_state.paused then return end
 
-    if game_state.current_location == "menu" and love.mouse.isDown("1") then
+--[[     if love.keyboard.isDown("p") then
+        love.graphics.captureScreenshot(os.time() .. ".png")
+        love.event.quit()
+    end ]]
+
+    if game_state.current_location == "menu" and love.mouse.isDown("1") and next_action_allowed < love.timer.getTime()  then
         local x, y = love.mouse.getPosition()
         if is_colliding({x = x, y = y}, menu_start_box) then
             game_state.current_location = "store"
+            next_action_allowed = love.timer.getTime() + 0.2
             music:play()
         elseif is_colliding({x = x, y = y}, menu_help_box) then
             game_state.current_location = "help"
+            next_action_allowed = love.timer.getTime() + 0.2
         elseif is_colliding({x = x, y = y}, menu_quit_box) then
             love.event.quit()
         end
@@ -172,7 +188,9 @@ function love.update(delta)
         return
     end
 
-    if game_state.current_location == "help" then
+    if game_state.current_location == "help" and next_action_allowed < love.timer.getTime() and (love.keyboard.isDown("space") or love.mouse.isDown("1")) then
+        game_state.help:next_page(game_state)
+        next_action_allowed = love.timer.getTime() + 0.2
         return
     end
 
@@ -356,6 +374,23 @@ function love.draw()
     end
 
     if game_state.current_location == "help" then
+        if game_state.help.page == 1 then
+            love.graphics.print(HELP_SHOP, 0, 20)
+        elseif game_state.help.page == 2 then
+            love.graphics.draw(help.store)
+            love.graphics.draw(help.big_message, 120, 100)
+            love.graphics.draw(help.big_message, 120, 450)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print(HELP_CONVERSATION, 120, 120)
+            love.graphics.print(HELP_INVENTORY, 120, 460)
+            love.graphics.setColor(1, 1, 1)
+
+        elseif game_state.help.page == 3 then
+            love.graphics.draw(help.garden)
+        elseif game_state.help.page == 4 then
+            love.graphics.print("BREW TODO!")
+            
+        end
         return
     end
 
@@ -374,7 +409,7 @@ function love.draw()
             love.graphics.draw(customer_sprites[c.color], 190, 220 + i * 60, 0, 4, 4)
         end
 
-        love.graphics.print(game_state.clock:to_string())
+        -- love.graphics.print(game_state.clock:to_string())
 
         draw_conversation(active_customer)
         draw_inventory()
