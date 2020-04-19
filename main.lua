@@ -205,6 +205,7 @@ function love.load()
     love.graphics.setDefaultFilter( "nearest", "nearest")
     buy_cauldron = love.graphics.newImage("Assets/upgrade_box.png")
     store = love.graphics.newImage("Assets/store.png")
+    menu_bg = love.graphics.newImage("Assets/menu_bg.png")
     cauldron_full = love.graphics.newImage("Assets/cauldron_full.png")
     store_closed = love.graphics.newImage("Assets/store_closed.png")
     witch_front = love.graphics.newImage("Assets/witch_front.png")
@@ -617,6 +618,7 @@ end
 
 function love.draw()
     if game_state.current_location == "menu" then
+        love.graphics.draw(menu_bg, 0, 0, 0, 5.4, 5.4)
         if debug then
             love.graphics.rectangle("line", menu_start_box.x, menu_start_box.y, menu_start_box.width, menu_start_box.height)
             love.graphics.rectangle("line", menu_help_box.x, menu_help_box.y, menu_help_box.width, menu_help_box.height)
