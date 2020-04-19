@@ -581,6 +581,9 @@ function love.update(delta)
                                         game_state.inventory:spend_money(ingredients_prices[selected_ingredient])
                                         game_state.garden_contents[i][j].name = selected_ingredient
                                         game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
+                                    else
+                                        message.message = "Not enough money"
+                                        message.expiration = 2 
                                     end
                                 end
                             else
