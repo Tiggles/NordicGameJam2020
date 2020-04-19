@@ -60,11 +60,11 @@ function Inventory:has_previous_page()
 end
 
 function Inventory:next_page()
-    self.page = self.page + 1
+    self.page = math.min(self.page + 1, 2)
 end
 
 function Inventory:previous_page()
-    self.page = self.page - 1
+    self.page = math.max(self.page - 1, 1)
 end
 
 function Inventory:use_potion(power)

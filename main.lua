@@ -11,6 +11,8 @@ local store
 local store_closed
 local witch_front
 local witch_back
+local arrow_left
+local arrow_right
 local garden
 local music
 local potions = {}
@@ -26,6 +28,7 @@ local cat_eyes_cursor
 local camel_hump_cursor
 local seaweed_cursor
 local arrow_cursor
+local showing_upgrades = false
 local responses = {
     accept = { "I have just the thing.", "Maybe this is for you?", "Take this." },
     postpone = { "I'm out of ingredients, can you come back later?", "Sorry, but we're out for now."},
@@ -53,8 +56,8 @@ local game_state = {
 
 local garden_plot_start_x = 236 
 local garden_plot_start_y = 45 
-local plot_width = 97 
-local plot_height = 97 
+local plot_width = 97
+local plot_height = 97
 local num_x_plots = 5
 local num_y_plots = 5
 local garden_plots = {}
@@ -71,7 +74,8 @@ for i = 1, num_x_plots do
     end
 end
 
-
+local inventory_left_box = {x = 490, y = 576, width = 17 * 3, height = 14 * 3}
+local inventory_right_box = {x = 805, y = 576, width = 17 * 3, height = 14 * 3}
 local accept_box = {x = 500, y = 100, width = 345, height = 55}
 local postpone_box = {x = 500, y = accept_box.y + accept_box.height + 15, width = 345, height = 55}
 local decline_box = {x = 500, y = postpone_box.y + postpone_box.height + 15, width = 345, height = 55}
@@ -97,6 +101,8 @@ function love.load()
     ingredient_bubble = love.graphics.newImage("Assets/ingredient_bubble.png")
     customer_head = love.graphics.newImage("Assets/customer_head.png")
     garden = love.graphics.newImage("Assets/garden.png")
+    arrow_left = love.graphics.newImage("Assets/arrow_left.png")
+    arrow_right = love.graphics.newImage("Assets/arrow_right.png")
 
     potions.strength = love.graphics.newImage("Assets/potion_strength.png")
     potions.speed = love.graphics.newImage("Assets/potion_speed.png")
@@ -129,7 +135,7 @@ end
 
 function love.update(delta)
     if game_state.paused then return end
-    if love.keyboard.isDown("escape") then love.event.quit() end
+    -- if love.keyboard.isDown("escape") then love.event.quit() end
     if love.keyboard.isDown("f4") and next_action_allowed < love.timer.getTime() then
         debug = not debug
         next_action_allowed = love.timer.getTime() + 0.2
@@ -197,6 +203,10 @@ function love.update(delta)
                     table.remove(game_state.customers, 1)
                     action_happened = true
                     next_action_allowed = love.timer.getTime() + 0.2
+                elseif is_colliding({x=x, y=y}, inventory_left_box) then
+                    game_state.inventory:previous_page()
+                elseif is_colliding({x=x, y=y}, inventory_right_box) then
+                    game_state.inventory:next_page()
                 else
                     print("None")
                 end
@@ -305,6 +315,22 @@ function is_colliding(point, box)
 end
 
 function draw_inventory()
+    if game_state.inventory:has_previous_page() then
+        love.graphics.setColor(1, 1, 1)
+    else
+        love.graphics.setColor(0.6, 0.6, 0.6)
+    end
+    love.graphics.draw(arrow_left, inventory_left_box.x, inventory_left_box.y, 0, 3, 3)
+
+    if game_state.inventory:has_next_page() then
+        love.graphics.setColor(1, 1, 1)
+    else
+        love.graphics.setColor(0.6, 0.6, 0.6)
+    end
+    love.graphics.draw(arrow_right, inventory_right_box.x, inventory_right_box.y, 0, 3, 3)
+
+    love.graphics.setColor(1, 1, 1)
+
     if game_state.inventory.page == 1 then -- potions
         love.graphics.draw(potions.strength, 540, 375, 0, 3, 3)
         love.graphics.draw(potions.speed, 720, 375, 0, 3, 3)
