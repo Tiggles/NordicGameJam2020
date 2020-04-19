@@ -40,7 +40,8 @@ local function pad(val, threshold, padding_char)
 end
 
 function Clock:to_string()
-    return days[self.day].. " " .. pad(math.floor(self.hours), 10, "0") .. ":" .. pad(math.floor(self.minutes), 10, "0")
+    local sectioned_minutes = self.minutes - self.minutes % 10 
+    return days[self.day].. " " .. pad(math.floor(self.hours), 10, "0") .. ":" .. pad(math.floor(sectioned_minutes), 10, "0")
 end
 
 function Clock:is_open()
