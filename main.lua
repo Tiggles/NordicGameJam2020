@@ -284,11 +284,6 @@ function love.update(delta)
             end
         end
     end
-    -- At start of day, calculate when customers appear
-
-    -- skip time faster if no customers present
-
-    -- Add dialog options if customer is requesting something.
 end
 
 function love.draw()
@@ -300,7 +295,6 @@ function love.draw()
             love.graphics.draw(store, 0, 0, 0, 3, 3)
         else
             love.graphics.draw(store_closed, 0, 0, 0, 3, 3)
-            -- love.graphics.print("Press space to skip to open hours.")
         end
 
         for i = 1, #game_state.customers do
@@ -370,7 +364,17 @@ function draw_inventory()
         love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
         love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
     else -- inventory
+        love.graphics.draw(ingredients.spinach, 540, 375, 0, 3, 3)
+        love.graphics.draw(ingredients.coffee, 720, 375, 0, 3, 3)
+        love.graphics.draw(ingredients.cat_eyes, 540, 470, 0, 3, 3)
+        love.graphics.draw(ingredients.camel_hump, 720, 470, 0, 3, 3)
+        love.graphics.draw(ingredients.seaweed, 630, 560, 0, 3, 3)
 
+        love.graphics.print(game_state.inventory:get_spinach(), 600, 382)
+        love.graphics.print(game_state.inventory:get_coffee(), 780, 382)
+        love.graphics.print(game_state.inventory:get_cat_eyes(), 600, 472)
+        love.graphics.print(game_state.inventory:get_camel_hump(), 780, 472)
+        love.graphics.print(game_state.inventory:get_seaweed(), 690, 572)
     end
 end
 
@@ -381,7 +385,7 @@ function draw_garden_plots()
         for j =1, num_y_plots do
             if game_state.garden_contents[i][j].name ~= nil then
                 love.graphics.rectangle("line", garden_plots[i][j].x, garden_plots[i][j].y, garden_plots[i][j].width, garden_plots[i][j].height)
-                
+
                 if game_state.garden_contents[i][j].name == "spinach" then
                     love.graphics.draw(ingredients.spinach, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
                 elseif game_state.garden_contents[i][j].name == "coffee" then
