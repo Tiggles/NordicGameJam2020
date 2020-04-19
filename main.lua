@@ -87,15 +87,20 @@ local game_state = {
     },
     cauldrons = {
         a = {x=300, y=200, width=76, height=81, content = {}},
-        b = {x=390, y=200, width=76, height=81, content = {}}
+        b = {x=390, y=200, width=76, height=81, content = {}},
+        c = {x=300, y=300, width=76, height=81, content = {}},
+        d = {x=390, y=300, width=76, height=81, content = {}},
+    },
+    upgrades = {
+        cauldrons = 2
     },
     money = 200,
     current_location = "menu",
     garden_contents = {}
 }
 
-local garden_plot_start_x = 236 
-local garden_plot_start_y = 45 
+local garden_plot_start_x = 236
+local garden_plot_start_y = 45
 local plot_width = 97
 local plot_height = 97
 local num_x_plots = 5
@@ -285,6 +290,26 @@ function love.update(delta)
         end
     end
 
+    if game_state.cauldrons.c.content.name ~= nil then
+        if game_state.cauldrons.c.content.time_left > 0 then
+            game_state.cauldrons.c.content.time_left = game_state.cauldrons.c.content.time_left - delta
+        end
+
+        if game_state.cauldrons.c.content.time_left < 0 then
+            game_state.cauldrons.c.content.time_left = 0
+        end
+    end
+
+    if game_state.cauldrons.d.content.name ~= nil then
+        if game_state.cauldrons.d.content.time_left > 0 then
+            game_state.cauldrons.d.content.time_left = game_state.cauldrons.d.content.time_left - delta
+        end
+
+        if game_state.cauldrons.d.content.time_left < 0 then
+            game_state.cauldrons.d.content.time_left = 0
+        end
+    end
+
 
     if game_state.current_location == "store" then
         if not game_state.clock:is_open() and love.keyboard.isDown("space") then
@@ -312,6 +337,63 @@ function love.update(delta)
 
         if love.mouse.isDown("1") then
             local action_happened = false
+
+            if is_colliding({x=x, y=y}, game_state.cauldrons.a) then
+                print("cauldron a clicked",game_state.cauldrons.a.content.name,selected_potion)
+
+                if game_state.cauldrons.a.content.name == nil and selected_potion ~= nil then
+                    game_state.cauldrons.a.content.name = selected_potion
+                    game_state.cauldrons.a.content.time_left = potion_times[selected_potion]
+                end
+
+                if game_state.cauldrons.a.content.name ~= nil then
+                    if game_state.cauldrons.a.content.time_left == 0 then
+                        selected_potion = nil
+                        game_state.inventory:add_potion(game_state.cauldrons.a.content.name)
+                        game_state.cauldrons.a.content = {}
+                    end
+                end
+            elseif is_colliding({x=x, y=y}, game_state.cauldrons.b) then
+                if game_state.cauldrons.b.content.name == nil and selected_potion ~= nil then
+                    game_state.cauldrons.b.content.name = selected_potion
+                    game_state.cauldrons.b.content.time_left = potion_times[selected_potion]
+                end
+
+                if game_state.cauldrons.b.content.name ~= nil then
+                    if game_state.cauldrons.b.content.time_left == 0 then
+                        selected_potion = nil
+                        game_state.inventory:add_potion(game_state.cauldrons.b.content.name)
+                        game_state.cauldrons.b.content = {}
+                    end
+                end
+            elseif game_state.upgrades.cauldrons > 2 and is_colliding({x=x, y=y}, game_state.cauldrons.c) then
+                if game_state.cauldrons.c.content.name == nil and selected_potion ~= nil then
+                    game_state.cauldrons.c.content.name = selected_potion
+                    game_state.cauldrons.c.content.time_left = potion_times[selected_potion]
+                end
+
+                if game_state.cauldrons.c.content.name ~= nil then
+                    if game_state.cauldrons.c.content.time_left == 0 then
+                        selected_potion = nil
+                        game_state.inventory:add_potion(game_state.cauldrons.c.content.name)
+                        game_state.cauldrons.c.content = {}
+                    end
+                end
+            elseif game_state.upgrades.cauldrons > 3 and is_colliding({x=x, y=y}, game_state.cauldrons.d) then
+                if game_state.cauldrons.d.content.name == nil and selected_potion ~= nil then
+                    game_state.cauldrons.d.content.name = selected_potion
+                    game_state.cauldrons.d.content.time_left = potion_times[selected_potion]
+                end
+
+                if game_state.cauldrons.d.content.name ~= nil then
+                    if game_state.cauldrons.d.content.time_left == 0 then
+                        selected_potion = nil
+                        game_state.inventory:add_potion(game_state.cauldrons.d.content.name)
+                        game_state.cauldrons.d.content = {}
+                    end
+                end
+            end
+
             if active_customer and next_action_allowed < love.timer.getTime() then
                 if is_colliding({x = x, y = y}, accept_box) then
                     local power = game_state.customers[1]:get_power()
@@ -351,34 +433,6 @@ function love.update(delta)
                 selected_potion = nil
                 game_state.current_location = "garden"
                 music:pause()
-            elseif is_colliding({x=x, y=y}, game_state.cauldrons.a) then
-                print("cauldron a clicked",game_state.cauldrons.a.content.name,selected_potion)
-
-                if game_state.cauldrons.a.content.name == nil and selected_potion ~= nil then
-                    game_state.cauldrons.a.content.name = selected_potion
-                    game_state.cauldrons.a.content.time_left = potion_times[selected_potion]
-                end
-
-                if game_state.cauldrons.a.content.name ~= nil then
-                    if game_state.cauldrons.a.content.time_left == 0 then
-                        selected_potion = nil
-                        game_state.inventory:add_potion(game_state.cauldrons.a.content.name)
-                        game_state.cauldrons.a.content = {}
-                    end
-                end
-            elseif is_colliding({x=x, y=y}, game_state.cauldrons.b) then
-                if game_state.cauldrons.b.content.name == nil and selected_potion ~= nil then
-                    game_state.cauldrons.b.content.name = selected_potion
-                    game_state.cauldrons.b.content.time_left = potion_times[selected_potion]
-                end
-
-                if game_state.cauldrons.b.content.name ~= nil then
-                    if game_state.cauldrons.b.content.time_left == 0 then
-                        selected_potion = nil
-                        game_state.inventory:add_potion(game_state.cauldrons.b.content.name)
-                        game_state.cauldrons.b.content = {}
-                    end
-                end
             elseif is_colliding({x=x, y=y}, potion_positions.strength) then
                 selected_potion = "strength"
             elseif is_colliding({x=x, y=y}, potion_positions.speed) then
@@ -610,6 +664,14 @@ function draw_cauldrons()
     love.graphics.draw(cauldron_full, game_state.cauldrons.a.x, game_state.cauldrons.a.y, 0, 3, 3)
     love.graphics.draw(cauldron_full, game_state.cauldrons.b.x, game_state.cauldrons.b.y, 0, 3, 3)
 
+    if game_state.upgrades.cauldrons > 2 then
+        love.graphics.draw(cauldron_full, game_state.cauldrons.c.x, game_state.cauldrons.c.y, 0, 3, 3)
+    end
+
+    if game_state.upgrades.cauldrons > 3 then
+        love.graphics.draw(cauldron_full, game_state.cauldrons.d.x, game_state.cauldrons.d.y, 0, 3, 3)
+    end
+
     if game_state.cauldrons.a.content.name ~= nil then
         if game_state.cauldrons.a.content.name == "strength" then
             love.graphics.draw(potions.strength, game_state.cauldrons.a.x+16, game_state.cauldrons.a.y-30, 0, 3, 3)
@@ -639,11 +701,11 @@ function draw_cauldrons()
             love.graphics.draw(potions.strength, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
         elseif game_state.cauldrons.b.content.name == "speed" then
             love.graphics.draw(potions.speed, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
-        elseif  game_state.cauldrons.b.content.name == "endurance" then
+        elseif game_state.cauldrons.b.content.name == "endurance" then
             love.graphics.draw(potions.endurance, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
-        elseif  game_state.cauldrons.b.content.name == "nightvision" then
+        elseif game_state.cauldrons.b.content.name == "nightvision" then
             love.graphics.draw(potions.nightvision, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
-        elseif  game_state.cauldrons.b.content.name == "underwater" then
+        elseif game_state.cauldrons.b.content.name == "underwater" then
             love.graphics.draw(potions.underwater, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
         end
 
@@ -656,6 +718,54 @@ function draw_cauldrons()
         end
 
         love.graphics.print(time_text, game_state.cauldrons.b.x+30, game_state.cauldrons.b.y+30)
+    end
+
+    if game_state.cauldrons.c.content.name ~= nil then
+        if game_state.cauldrons.c.content.name == "strength" then
+            love.graphics.draw(potions.strength, game_state.cauldrons.c.x+16, game_state.cauldrons.c.y-30, 0, 3, 3)
+        elseif game_state.cauldrons.c.content.name == "speed" then
+            love.graphics.draw(potions.speed, game_state.cauldrons.c.x+16, game_state.cauldrons.c.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.c.content.name == "endurance" then
+            love.graphics.draw(potions.endurance, game_state.cauldrons.c.x+16, game_state.cauldrons.c.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.c.content.name == "nightvision" then
+            love.graphics.draw(potions.nightvision, game_state.cauldrons.c.x+16, game_state.cauldrons.c.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.c.content.name == "underwater" then
+            love.graphics.draw(potions.underwater, game_state.cauldrons.c.x+16, game_state.cauldrons.c.y-30, 0, 3, 3)
+        end
+
+        local time_text = "?"
+
+        if game_state.cauldrons.c.content.time_left == 0 then
+            time_text = "Done"
+        else
+            time_text = math.ceil(game_state.cauldrons.c.content.time_left)
+        end
+
+        love.graphics.print(time_text, game_state.cauldrons.c.x+30, game_state.cauldrons.c.y+30)
+    end
+
+    if game_state.cauldrons.d.content.name ~= nil then
+        if game_state.cauldrons.d.content.name == "strength" then
+            love.graphics.draw(potions.strength, game_state.cauldrons.d.x+16, game_state.cauldrons.d.y-30, 0, 3, 3)
+        elseif game_state.cauldrons.d.content.name == "speed" then
+            love.graphics.draw(potions.speed, game_state.cauldrons.d.x+16, game_state.cauldrons.d.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.d.content.name == "endurance" then
+            love.graphics.draw(potions.endurance, game_state.cauldrons.d.x+16, game_state.cauldrons.d.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.d.content.name == "nightvision" then
+            love.graphics.draw(potions.nightvision, game_state.cauldrons.d.x+16, game_state.cauldrons.d.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.d.content.name == "underwater" then
+            love.graphics.draw(potions.underwater, game_state.cauldrons.d.x+16, game_state.cauldrons.d.y-30, 0, 3, 3)
+        end
+
+        local time_text = "?"
+
+        if game_state.cauldrons.d.content.time_left == 0 then
+            time_text = "Done"
+        else
+            time_text = math.ceil(game_state.cauldrons.d.content.time_left)
+        end
+
+        love.graphics.print(time_text, game_state.cauldrons.d.x+30, game_state.cauldrons.d.y+30)
     end
 
 end
