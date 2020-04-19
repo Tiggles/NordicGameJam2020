@@ -48,7 +48,7 @@ function Clock:is_open()
 end
 
 function Clock:skip_to_open()
-    if self.hours > self.closing_hour or self.day == 7 then
+    if self.hours >= self.closing_hour or self.day == 7 then
         self.day = self.day % #days + 1
     end
     self.hours = self.opening_hour
