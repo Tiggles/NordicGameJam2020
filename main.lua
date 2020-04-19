@@ -709,13 +709,6 @@ function love.draw()
             love.graphics.print("New cauldron 10.000", buy_cauldron_box.x + 8, buy_cauldron_box.y + 12)
         end
 
-        if message.message ~= "" and message.expiration > 0 then
-            love.graphics.draw(help.small_message, 350, 580)
-            love.graphics.setColor(0, 0, 0)
-            love.graphics.print(message.message, 355, 600)
-            love.graphics.setColor(1, 1, 1)
-        end
-
     elseif game_state.current_location == "garden" then
         love.graphics.draw(garden, 0, 0, 0, 3, 3)
         draw_garden_plots()
@@ -743,7 +736,12 @@ function love.draw()
         love.graphics.print(game_state.clock:to_string(), 280, 3)
     end
 
-    if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
+    if message.message ~= "" and message.expiration > 0 then
+        love.graphics.draw(help.small_message, 350, 580)
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.print(message.message, 355, 600)
+        love.graphics.setColor(1, 1, 1)
+    end
 end
 
 function is_colliding(point, box)
