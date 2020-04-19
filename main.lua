@@ -25,6 +25,13 @@ local responses = {
     postpone = { "I'm out of ingredients, can you come back later?", "Sorry, but we're out for now."},
     decline = {"I don't have anything for that, sorry.", "Hmm, no. Sorry."}
 }
+local ingredient_times = {
+    spinach = 10,
+    coffee = 20,
+    cat_eyes = 40,
+    camel_hump = 60,
+    seaweed = 5
+}
 local game_state = {
     inventory = Inventory:new(),
     customers = {},
@@ -112,6 +119,9 @@ function love.load()
 
     for i = 1, num_x_plots do
         game_state.garden_contents[i] = {}
+        for j = 1, num_y_plots do
+            game_state.garden_contents[i][j] = {}
+        end
     end
 
     spinach_cursor = love.mouse.newCursor("Assets/spinach.png", 8, 8)
@@ -144,8 +154,22 @@ function love.update(delta)
 
     if not game_state.clock:is_open() and #game_state.customers > 0 then game_state.customers = {} end
 
-    if game_state.current_location == "store" then
+    -- update garden times
+    for i = 1, num_x_plots do
+        for j = 1, num_y_plots do
+            if game_state.garden_contents[i][j].name ~= nil then
+                if game_state.garden_contents[i][j].time_left > 0 then
+                    game_state.garden_contents[i][j].time_left = game_state.garden_contents[i][j].time_left - delta
+                end
+                
+                if game_state.garden_contents[i][j].time_left < 0 then
+                    game_state.garden_contents[i][j].time_left = 0
+                end
+            end
+        end
+    end
 
+    if game_state.current_location == "store" then
         if not game_state.clock:is_open() and love.keyboard.isDown("space") then
             game_state.clock:skip_to_open()
         end
@@ -226,7 +250,8 @@ function love.update(delta)
                     for j = 1, num_y_plots do
                         if is_colliding({x=x, y=y}, garden_plots[i][j]) then
                             garden_plot_clicked = true
-                            game_state.garden_contents[i][j] = selected_ingredient
+                            game_state.garden_contents[i][j].name = selected_ingredient
+                            game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
                         end
                     end
                 end
@@ -314,20 +339,30 @@ function draw_garden_plots()
 
     for i = 1, num_x_plots do
         for j =1, num_y_plots do
-            if game_state.garden_contents[i][j] ~= nil then
+            if game_state.garden_contents[i][j].name ~= nil then
                 love.graphics.rectangle("line", garden_plots[i][j].x, garden_plots[i][j].y, garden_plots[i][j].width, garden_plots[i][j].height)
                 
-                if game_state.garden_contents[i][j] == "spinach" then
+                if game_state.garden_contents[i][j].name == "spinach" then
                     love.graphics.draw(ingredients.spinach, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
-                elseif game_state.garden_contents[i][j] == "coffee" then
+                elseif game_state.garden_contents[i][j].name == "coffee" then
                     love.graphics.draw(ingredients.coffee, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
-                elseif game_state.garden_contents[i][j] == "cat_eyes" then
+                elseif game_state.garden_contents[i][j].name == "cat_eyes" then
                     love.graphics.draw(ingredients.cat_eyes, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
-                elseif game_state.garden_contents[i][j] == "camel_hump" then
+                elseif game_state.garden_contents[i][j].name == "camel_hump" then
                     love.graphics.draw(ingredients.camel_hump, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
-                elseif game_state.garden_contents[i][j] == "seaweed" then
+                elseif game_state.garden_contents[i][j].name == "seaweed" then
                     love.graphics.draw(ingredients.seaweed, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
                 end
+
+                local time_text = "?"
+
+                if game_state.garden_contents[i][j].time_left == 0 then
+                    time_text = "Done"
+                else
+                    time_text = math.ceil(game_state.garden_contents[i][j].time_left)
+                end
+
+                love.graphics.print(time_text, garden_plots[i][j].x+plot_offset.x - 10, garden_plots[i][j].y+plot_offset.y + 55)
             end
         end
     end
@@ -348,11 +383,18 @@ function draw_garden_menu()
     love.graphics.draw(ingredients.seaweed, 22, 300, 0, 3, 3)
 
     love.graphics.setColor(0, 0, 0)
-    love.graphics.print("Spinach", 80, 40)
-    love.graphics.print("Coffee", 80, 110)
-    love.graphics.print("Cat Eyes", 80, 180)
-    love.graphics.print("Camel's Hump", 80, 250)
-    love.graphics.print("Seaweed", 80, 320)
+    love.graphics.print("Spinach", 80, 30)
+    love.graphics.print("Coffee", 80, 100)
+    love.graphics.print("Cat Eyes", 80, 170)
+    love.graphics.print("Camel's Hump", 80, 240)
+    love.graphics.print("Seaweed", 80, 310)
+    love.graphics.setColor(0.3, 0.3, 0.3)
+    love.graphics.print("Inventory: "..game_state.inventory:get_spinach(), 80, 50)
+    love.graphics.print("Inventory: "..game_state.inventory:get_coffee(), 80, 120)
+    love.graphics.print("Inventory: "..game_state.inventory:get_cat_eyes(), 80, 190)
+    love.graphics.print("Inventory: "..game_state.inventory:get_camel_hump(), 80, 260)
+    love.graphics.print("Inventory: "..game_state.inventory:get_seaweed(), 80, 330)
+
     love.graphics.setColor(1, 1, 1)
 end
 
