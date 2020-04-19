@@ -57,7 +57,7 @@ local game_state = {
     },
     cauldrons = {},
     money = 200,
-    current_location = "store",
+    current_location = "menu",
     garden_contents = {}
 }
 
@@ -80,6 +80,10 @@ for i = 1, num_x_plots do
         }
     end
 end
+
+local menu_start_box = { x = 260, y = 220, width = 345, height = 60 }
+local menu_help_box = { x = 260, y = 290, width = 345, height = 60 }
+local menu_quit_box = { x = 260, y = 360, width = 345, height = 60 }
 
 local inventory_left_box = {x = 490, y = 576, width = 17 * 3, height = 14 * 3}
 local inventory_right_box = {x = 805, y = 576, width = 17 * 3, height = 14 * 3}
@@ -125,7 +129,6 @@ function love.load()
 
     music = love.audio.newSource("Assets/elevator_music.wav", "static")
     music:setLooping(true)
-    music:play()
     table.insert(customer_sprites, love.graphics.newImage("Assets/customer_blue.png"))
     for i = 1, num_x_plots do
         game_state.garden_contents[i] = {}
@@ -145,6 +148,25 @@ end
 
 function love.update(delta)
     if game_state.paused then return end
+
+    if game_state.current_location == "menu" and love.mouse.isDown("1") then
+        local x, y = love.mouse.getPosition()
+        if is_colliding({x = x, y = y}, menu_start_box) then
+            game_state.current_location = "store"
+            music:play()
+        elseif is_colliding({x = x, y = y}, menu_help_box) then
+            game_state.current_location = "help"
+        elseif is_colliding({x = x, y = y}, menu_quit_box) then
+            love.event.quit()
+        end
+
+        return
+    end
+
+    if game_state.current_location == "help" then
+        return
+    end
+
     -- if love.keyboard.isDown("escape") then love.event.quit() end
     if love.keyboard.isDown("f4") and next_action_allowed < love.timer.getTime() then
         debug = not debug
@@ -287,6 +309,28 @@ function love.update(delta)
 end
 
 function love.draw()
+    if game_state.current_location == "menu" then
+        if debug then
+            love.graphics.rectangle("line", menu_start_box.x, menu_start_box.y, menu_start_box.width, menu_start_box.height)
+            love.graphics.rectangle("line", menu_help_box.x, menu_help_box.y, menu_help_box.width, menu_help_box.height)
+            love.graphics.rectangle("line", menu_quit_box.x, menu_quit_box.y, menu_quit_box.width, menu_quit_box.height)
+        end
+
+        love.graphics.draw(response_bubble, menu_start_box.x, menu_start_box.y)
+        love.graphics.draw(response_bubble, menu_help_box.x, menu_help_box.y)
+        love.graphics.draw(response_bubble, menu_quit_box.x, menu_quit_box.y)
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.print("Play", menu_start_box.x + 160, menu_start_box.y + 25)
+        love.graphics.print("How to", menu_help_box.x + 150, menu_help_box.y + 25)
+        love.graphics.print("Quit", menu_quit_box.x + 160, menu_quit_box.y + 25)
+        love.graphics.setColor(1, 1, 1)
+        return
+    end
+
+    if game_state.current_location == "help" then
+        return
+    end
+
     local active_customer = game_state.customers[1] ~= nil
 
     if game_state.current_location == "store" then

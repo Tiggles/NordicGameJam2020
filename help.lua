@@ -10,11 +10,12 @@ HELP_SHOP = [[
 ]]
 
 HELP_INVENTORY = [[
-        
+    Your inventory shows the potions in stock and the amount of ingredients available.
 ]]
 
 HELP_GARDEN = [[
-
+    In your garden, you can plant ingredients. After a certain amount of time, they can be picked,
+    and used for brewing.
 ]]
 
 HELP_BREWING = [[
