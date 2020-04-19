@@ -636,7 +636,7 @@ function love.draw()
             love.graphics.draw(help.store)
             love.graphics.draw(help.big_message)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.print(HELP_SHOP, 0, 20)
+            love.graphics.print(HELP_SHOP, 0, 10)
             love.graphics.setColor(1, 1, 1)
         elseif game_state.help.page == 2 then
             love.graphics.draw(help.store)

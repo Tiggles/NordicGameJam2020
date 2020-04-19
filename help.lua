@@ -4,6 +4,8 @@ HELP_SHOP = [[
     10:00 to 18:00, customers will come to you
     with their problems. The better you do, the
     higher the rate of customers will become.
+
+    You are closed on sundays.
 ]]
 
 HELP_NEXT = [[
