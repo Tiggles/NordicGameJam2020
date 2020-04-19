@@ -1,25 +1,45 @@
 HELP_SHOP = [[
     You run a small potion shop in the city.
-    In your opening hours every day from 10:00 to 18:00, customers will come to with their problems.
-    To the left you can see your shop, and to the right you can see the conversations and inventory.
-    If you have the potion in stock, you can sell it, but the faster the better.
-    If you don't have it in stock, you can tell the customer to come back a week from the day, but only once.
-    Otherwise, you can decline.
+    In your opening hours every day from
+    10:00 to 18:00, customers will come to you
+    with their problems. The better you do, the
+    higher the rate of customers will become.
+]]
 
-    The better you do, the higher the rate of customers will become.
+HELP_NEXT = [[
+    Click space or left mouse
+    button to continue. 
+]]
+
+HELP_CONVERSATION = [[ 
+    If you have the potion in stock, you can sell it, but
+    the faster the better. If you don't have it in stock,
+    you can tell the customer to come back a week from 
+    today, but only once. Otherwise, you can decline.
 ]]
 
 HELP_INVENTORY = [[
-    Your inventory shows the potions in stock and the amount of ingredients available.
+    Your inventory shows the potions in stock and
+    the amount of ingredients available. Click the
+    left and right buttons to navigate your
+    inventory. To the bottom you can see your 
+    current balance and go to your garden. 
+    
+    Time doesn't stop in the garden.
 ]]
 
 HELP_GARDEN = [[
-    In your garden, you can plant ingredients. After a certain amount of time, they can be picked,
-    and used for brewing.
+    In your garden, you can plant ingredients. After
+    a certain amount of time, they can be picked,
+    and used for brewing potions.
+    
+    Every ingredient has a price to plant,
+    except seaweed.
 ]]
 
 HELP_BREWING = [[
     Brewing potions is done using ingredients from your garden. Add the ingredients to your cauldrons to brew.
+    Recipes can be viewed on the brewing screen.
     Recipes:
         Strength - XXX with 2 XXX
         Speed - XXX with 2 XXX
@@ -27,3 +47,25 @@ HELP_BREWING = [[
         Night vision - XXX with 2 XXX
         Underwater breathing - XXX with 2 XXX
 ]]
+
+Help = {}
+
+function Help:new()
+    local help = {
+        page = 1,
+        page_count = 4
+    }
+    self.__index = self
+    return setmetatable(help, self)
+end
+
+function Help:next_page(game_state)
+    if self.page == self.page_count then
+        game_state.current_location = "menu"
+        self.page = 1
+    else
+        self.page = self.page + 1
+    end
+
+end
+
