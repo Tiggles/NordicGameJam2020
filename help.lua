@@ -68,7 +68,7 @@ end
 
 INGREDIENTS_WARNING = [[
         You need at least
-      two of and ingredient.
+      two of an ingredient.
 ]]
 
-CUSTOMER_LEFT = "Customer left."
+CUSTOMER_LEFT = "    Customer left."
