@@ -13,6 +13,7 @@ local witch_front
 local witch_back
 local arrow_left
 local arrow_right
+local coin
 local garden
 local music
 local potions = {}
@@ -121,6 +122,7 @@ function love.load()
     garden = love.graphics.newImage("Assets/garden.png")
     arrow_left = love.graphics.newImage("Assets/arrow_left.png")
     arrow_right = love.graphics.newImage("Assets/arrow_right.png")
+    coin = love.graphics.newImage("Assets/coin.png")
 
     potions.strength = love.graphics.newImage("Assets/potion_strength.png")
     potions.speed = love.graphics.newImage("Assets/potion_speed.png")
@@ -380,6 +382,8 @@ function love.draw()
         love.graphics.draw(garden, 0, 0, 0, 3, 3)
         draw_garden_plots()
         draw_garden_menu()
+        love.graphics.draw(coin, 195, 634, 0, 3, 3)
+        love.graphics.print(game_state.inventory.money, 220, 638)
 
         if selected_ingredient == "spinach" then
             love.mouse.setCursor(spinach_cursor)
@@ -397,7 +401,6 @@ function love.draw()
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
-    love.graphics.print(game_state.inventory.money, 5, 20)
 end
 
 function is_colliding(point, box)
@@ -446,6 +449,9 @@ function draw_inventory()
         love.graphics.print(game_state.inventory:get_camel_hump(), 780, 472)
         love.graphics.print(game_state.inventory:get_seaweed(), 690, 572)
     end
+
+    love.graphics.draw(coin, 500, 634, 0, 3, 3)
+    love.graphics.print(game_state.inventory.money, 540, 638)
 end
 
 function draw_garden_plots()
