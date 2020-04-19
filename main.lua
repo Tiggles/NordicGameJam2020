@@ -89,9 +89,22 @@ function love.update(delta)
     if not game_state.clock:is_open() and #game_state.customers > 0 then game_state.customers = {} end
 
     if game_state.current_location == "store" then
+
         if not game_state.clock:is_open() and love.keyboard.isDown("space") then
             game_state.clock:skip_to_open()
         end
+
+        if game_state.clock.hours == game_state.clock.opening_hour and #game_state.postponed_customers > 0 then
+            for i = #game_state.postponed_customers, 1, -1 do
+                local p_c = game_state.postponed_customers[i]
+                if p_c.week == game_state.clock.week and p_c.day == game_state.clock.day then
+                    game_state.postponed_customers[i].already_postponed = true
+                    table.insert(game_state.customers, game_state.postponed_customers[i])
+                    table.remove(game_state.postponed_customers, 1)
+                end
+            end
+        end
+
         if love.mouse.isDown("1") then
             local x, y = love.mouse.getPosition()
             if active_customer and next_action_allowed < love.timer.getTime() then
@@ -103,13 +116,13 @@ function love.update(delta)
                         table.remove(game_state.customers, 1)
                     end
                     next_action_allowed = love.timer.getTime() + 0.2
-                elseif is_colliding({x=x, y=y}, postpone_box) then
-                    print("Postpone")
+                elseif is_colliding({x=x, y=y}, postpone_box) and game_state.customers[1].already_postponed == false then
                     table.insert(game_state.postponed_customers, game_state.customers[1])
                     table.remove(game_state.customers, 1)
+                    game_state.postponed_customers[#game_state.postponed_customers].week = game_state.clock.week + 1
+                    game_state.postponed_customers[#game_state.postponed_customers].day = game_state.clock.day
                     next_action_allowed = love.timer.getTime() + 0.2
                 elseif is_colliding({x=x, y=y}, decline_box) then
-                    print("Decline")
                     table.remove(game_state.customers, 1)
                     next_action_allowed = love.timer.getTime() + 0.2
                 else
@@ -119,7 +132,6 @@ function love.update(delta)
             if is_colliding({x=x, y=y}, goto_garden_button) then
                 game_state.current_location = "garden"
                 music:pause()
-            else
             end
         end
     elseif game_state.current_location == "garden" then
@@ -188,13 +200,18 @@ end
 function draw_conversation(active_customer)
     if active_customer then
         local power = game_state.customers[1]:get_power()
+        local already_postponed = game_state.customers[1].already_postponed
         local remaining_potions = get_remaining_potions(power)
         if remaining_potions == 0 then
             love.graphics.setColor(0.6, 0.6, 0.6)
         end
         love.graphics.draw(response_bubble, accept_box.x, accept_box.y)
         love.graphics.setColor(1, 1, 1)
+        if already_postponed then
+            love.graphics.setColor(0.6, 0.6, 0.6)
+        end
         love.graphics.draw(response_bubble, postpone_box.x, postpone_box.y)
+        love.graphics.setColor(1, 1, 1)
         love.graphics.draw(response_bubble, decline_box.x, decline_box.y)
         love.graphics.draw(customer_head, 510, 30)
 
