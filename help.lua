@@ -38,14 +38,10 @@ HELP_GARDEN = [[
 ]]
 
 HELP_BREWING = [[
-    Brewing potions is done using ingredients from your garden. Add the ingredients to your cauldrons to brew.
-    Recipes can be viewed on the brewing screen.
-    Recipes:
-        Strength - XXX with 2 XXX
-        Speed - XXX with 2 XXX
-        Endurance - XXX with 2 XXX
-        Night vision - XXX with 2 XXX
-        Underwater breathing - XXX with 2 XXX
+    Brewing potions is done using the ingredients
+    from your garden. Add the ingredients to your
+    cauldrons by clicking on an ingredient and
+    then a cauldron to brew.
 ]]
 
 Help = {}

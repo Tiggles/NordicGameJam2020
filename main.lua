@@ -81,11 +81,12 @@ local help = {}
 local potion_price = 150
 local game_state = {
     help = Help:new(),
+    game_started = false,
     inventory = Inventory:new(),
     customers = {},
     finished_customers = {},
     postponed_customers = {},
-    paused = false,
+    paused = false, -- Probably deleteable, but do we want to take the chance?
     clock = Clock:new(10, 18, 10, 0, 20),
     queued_response = {
         accept = responses.accept[love.math.random(#responses.accept)],
@@ -99,7 +100,8 @@ local game_state = {
         d = {x=390, y=300, width=76, height=81, content = {}},
     },
     upgrades = {
-        cauldrons = 2
+        cauldrons = 2,
+        plant_growing_speed = 1
     },
     money = 200,
     current_location = "menu",
@@ -202,6 +204,7 @@ function love.load()
 
     help.store = love.graphics.newImage("Assets/Help/store_help.png")
     help.garden = love.graphics.newImage("Assets/Help/garden_help.png")
+    help.brewing = love.graphics.newImage("Assets/Help/brewing_help.png")
     help.big_message = love.graphics.newImage("Assets/big_message.png")
     help.small_message = love.graphics.newImage("Assets/small_message.png")
 
@@ -242,32 +245,36 @@ function love.load()
 end
 
 function love.update(delta)
-    if game_state.paused then return end
-
---[[     if love.keyboard.isDown("p") then
+--[[ 
+    if love.keyboard.isDown("p") then
         love.graphics.captureScreenshot(os.time() .. ".png")
         love.event.quit()
     end ]]
 
-    if game_state.current_location == "menu" and love.mouse.isDown("1") and next_action_allowed < love.timer.getTime()  then
-        local x, y = love.mouse.getPosition()
-        if is_colliding({x = x, y = y}, menu_start_box) then
-            game_state.current_location = "store"
-            next_action_allowed = love.timer.getTime() + 0.2
-            music:play()
-        elseif is_colliding({x = x, y = y}, menu_help_box) then
-            game_state.current_location = "help"
-            next_action_allowed = love.timer.getTime() + 0.2
-        elseif is_colliding({x = x, y = y}, menu_quit_box) then
-            love.event.quit()
+    if game_state.current_location == "menu" then
+        if love.mouse.isDown("1") and next_action_allowed < love.timer.getTime()  then
+            local x, y = love.mouse.getPosition()
+            if is_colliding({x = x, y = y}, menu_start_box) then
+                game_state.current_location = "store"
+                next_action_allowed = love.timer.getTime() + 0.2
+                game_state.game_started = true
+                music:play()
+            elseif is_colliding({x = x, y = y}, menu_help_box) then
+                game_state.current_location = "help"
+                next_action_allowed = love.timer.getTime() + 0.2
+            elseif is_colliding({x = x, y = y}, menu_quit_box) then
+                love.event.quit()
+            end
         end
 
         return
     end
 
-    if game_state.current_location == "help" and next_action_allowed < love.timer.getTime() and (love.keyboard.isDown("space") or love.mouse.isDown("1")) then
-        game_state.help:next_page(game_state)
-        next_action_allowed = love.timer.getTime() + 0.2
+    if game_state.current_location == "help" then
+        if next_action_allowed < love.timer.getTime() and (love.keyboard.isDown("space") or love.mouse.isDown("1")) then
+            game_state.help:next_page(game_state)
+            next_action_allowed = love.timer.getTime() + 0.2
+        end
         return
     end
 
@@ -355,6 +362,10 @@ function love.update(delta)
 
 
     if game_state.current_location == "store" then
+        if love.keyboard.isDown("escape") then
+            game_state.current_location = "menu"
+        end
+
         if not game_state.clock:is_open() and love.keyboard.isDown("space") then
             game_state.clock:skip_to_open()
         end
@@ -380,7 +391,6 @@ function love.update(delta)
 
         if love.mouse.isDown("1") then
             local action_happened = false
-
             if is_colliding({x=x, y=y}, game_state.cauldrons.a) then
                 if game_state.cauldrons.a.content.name == nil and selected_potion ~= nil then
                     if has_ingredients(selected_potion) then
@@ -554,6 +564,14 @@ function love.update(delta)
     end
 end
 
+function play_or_resume(started)
+    if started then return "Resume" else return "Play" end
+end
+
+function play_or_resume_distance(started)
+    if started then return 148 else return 160 end
+end
+
 function love.draw()
     if game_state.current_location == "menu" then
         if debug then
@@ -566,7 +584,7 @@ function love.draw()
         love.graphics.draw(response_bubble, menu_help_box.x, menu_help_box.y)
         love.graphics.draw(response_bubble, menu_quit_box.x, menu_quit_box.y)
         love.graphics.setColor(0, 0, 0)
-        love.graphics.print("Play", menu_start_box.x + 160, menu_start_box.y + 25)
+        love.graphics.print(play_or_resume(game_state.game_started), menu_start_box.x + play_or_resume_distance(game_state.game_started), menu_start_box.y + 25)
         love.graphics.print("How to", menu_help_box.x + 150, menu_help_box.y + 25)
         love.graphics.print("Quit", menu_quit_box.x + 160, menu_quit_box.y + 25)
         love.graphics.setColor(1, 1, 1)
@@ -596,7 +614,11 @@ function love.draw()
             love.graphics.print(HELP_GARDEN, 400, 35)
             love.graphics.setColor(1, 1, 1)
         elseif game_state.help.page == 4 then
-            love.graphics.print("BREW TODO!") 
+            love.graphics.draw(help.brewing)
+            love.graphics.draw(help.big_message, 150, 400)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print(HELP_BREWING, 155, 425)
+            love.graphics.setColor(1, 1, 1)
         end
         love.graphics.draw(help.small_message, 350, 580)
         love.graphics.setColor(0, 0, 0)
