@@ -71,7 +71,13 @@ local ingredients_prices = {
 }
 local help = {}
 
-local potion_price = 150
+local potion_price = {}
+potion_price["Speed"] = 400
+potion_price["Strength"] = 150
+potion_price["Underwater Breathing"] = 50
+potion_price["Night Vision"] = 1200
+potion_price["Endurance"] = 4000
+
 local game_state = {
     help = Help:new(),
     game_started = false,
@@ -94,7 +100,11 @@ local game_state = {
     },
     upgrades = {
         cauldrons = 2,
-        plant_growing_speed = 1
+        plant_growing_speed = 1,
+        max_inventory = 5
+    },
+    upgrade_prices = {
+
     },
     money = 200,
     current_location = "menu",
@@ -409,7 +419,7 @@ function love.update(delta)
                     local remaining_potions = get_remaining_potions(power)
                     if remaining_potions ~= 0 then
                         game_state.inventory:use_potion(power)
-                        game_state.inventory:add_money(game_state.customers[1].time_bonus + potion_price)
+                        game_state.inventory:add_money(game_state.customers[1].time_bonus + potion_price[power])
                         table.remove(game_state.customers, 1)
                     end
                     action_happened = true
