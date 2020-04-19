@@ -285,7 +285,6 @@ function love.draw()
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
-    love.graphics.print(HELP_SHOP)
 end
 
 function is_colliding(point, box)

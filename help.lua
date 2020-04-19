@@ -10,7 +10,7 @@ HELP_SHOP = [[
 ]]
 
 HELP_INVENTORY = [[
-
+        
 ]]
 
 HELP_GARDEN = [[
