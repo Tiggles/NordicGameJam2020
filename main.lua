@@ -106,10 +106,6 @@ function love.load()
     music:setLooping(true)
     music:play()
     table.insert(customer_sprites, love.graphics.newImage("Assets/customer_blue.png"))
-    table.insert(game_state.customers, Customer:new())
-    table.insert(game_state.customers, Customer:new())
-    table.insert(game_state.customers, Customer:new())
-
     for i = 1, num_x_plots do
         game_state.garden_contents[i] = {}
     end
