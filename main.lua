@@ -41,6 +41,13 @@ local ingredient_times = {
     camel_hump = 60,
     seaweed = 5
 }
+local ingredients_prices = {
+    spinach = 10,
+    coffee = 50,
+    cat_eyes = 500,
+    camel_hump = 1000,
+    seaweed = 0
+}
 
 local potion_price = 150
 local game_state = {
@@ -274,8 +281,13 @@ function love.update(delta)
                             garden_plot_clicked = true
 
                             if game_state.garden_contents[i][j].name == nil then
-                                game_state.garden_contents[i][j].name = selected_ingredient
-                                game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
+                                if selected_ingredient ~= nil then
+                                    if game_state.inventory:has_enough_money(ingredients_prices[selected_ingredient]) then
+                                        game_state.inventory:spend_money(ingredients_prices[selected_ingredient])
+                                        game_state.garden_contents[i][j].name = selected_ingredient
+                                        game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
+                                    end
+                                end
                             else
                                 if game_state.garden_contents[i][j].time_left == 0 then
                                     selected_ingredient = nil
@@ -443,6 +455,13 @@ function draw_garden_menu()
     love.graphics.print("Cat Eyes", 80, 170)
     love.graphics.print("Camel's Hump", 80, 240)
     love.graphics.print("Seaweed", 80, 310)
+
+    love.graphics.print("Price: "..ingredients_prices.spinach, 190, 30)
+    love.graphics.print("Price: "..ingredients_prices.coffee, 190, 100)
+    love.graphics.print("Price: "..ingredients_prices.cat_eyes, 190, 170)
+    love.graphics.print("Price: "..ingredients_prices.camel_hump, 190, 240)
+    love.graphics.print("Price: "..ingredients_prices.seaweed, 190, 310)
+
     love.graphics.setColor(0.3, 0.3, 0.3)
     love.graphics.print("Inventory: "..game_state.inventory:get_spinach(), 80, 50)
     love.graphics.print("Inventory: "..game_state.inventory:get_coffee(), 80, 120)
