@@ -256,7 +256,6 @@ function love.load()
 end
 
 function love.update(delta)
-    print(message.expiration)
     if game_state.current_location == "menu" then
         if love.mouse.isDown("1") and next_action_allowed < love.timer.getTime()  then
             local x, y = love.mouse.getPosition()
@@ -715,6 +714,11 @@ function love.draw()
         else
             love.mouse.setCursor(arrow_cursor)
         end
+
+        love.graphics.setColor(0,0,0)
+        love.graphics.rectangle("fill", 280, 0, 100, 20)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print(game_state.clock:to_string(), 280, 3)
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
