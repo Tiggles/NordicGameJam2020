@@ -10,7 +10,10 @@ local witch_back
 local garden
 local music
 local potions = {}
+local ingredients = {}
+local selected_ingredient
 local response_bubble
+local ingredient_bubble
 local customer_sprites = {}
 local customer_head
 local responses = {
@@ -32,14 +35,42 @@ local game_state = {
     },
     cauldrons = {},
     money = 200,
-    current_location = "store"
+    current_location = "store",
+    garden_contents = {}
 }
+
+local garden_plot_start_x = 236 
+local garden_plot_start_y = 45 
+local plot_width = 97 
+local plot_height = 97 
+local num_x_plots = 5
+local num_y_plots = 5
+local garden_plots = {}
+
+for i = 1, num_x_plots do
+    garden_plots[i] = {}
+    for j = 1, num_y_plots do
+        garden_plots[i][j] = {
+            x = i*plot_width+garden_plot_start_x,
+            y = j*plot_height+garden_plot_start_y,
+            width = plot_width,
+            height = plot_height
+        }
+    end
+end
+
 
 local accept_box = {x = 500, y = 100, width = 345, height = 55}
 local postpone_box = {x = 500, y = accept_box.y + accept_box.height + 15, width = 345, height = 55}
 local decline_box = {x = 500, y = postpone_box.y + postpone_box.height + 15, width = 345, height = 55}
 local goto_garden_button = {x = 700, y = 628, width = 160, height = 38}
 local goto_store_button = {x = 7, y = 628, width = 185, height = 38}
+
+local spinach_button_box = {x = 15, y = 15, width = 249, height = 60}
+local coffee_button_box = {x = 15, y = 85, width = 249, height = 60}
+local cat_eyes_button_box = {x = 15, y = 155, width = 249, height = 60}
+local camel_hump_button_box = {x = 15, y = 225, width = 249, height = 60}
+local seaweed_button_box = {x = 15, y = 295, width = 249, height = 60}
 
 local update = function() end
 local draw = function() end
@@ -50,13 +81,22 @@ function love.load()
     witch_front = love.graphics.newImage("Assets/witch_front.png")
     witch_back = love.graphics.newImage("Assets/witch_back.png")
     response_bubble = love.graphics.newImage("Assets/response_bubble.png")
+    ingredient_bubble = love.graphics.newImage("Assets/ingredient_bubble.png")
     customer_head = love.graphics.newImage("Assets/customer_head.png")
     garden = love.graphics.newImage("Assets/garden.png")
+
     potions.strength = love.graphics.newImage("Assets/potion_strength.png")
     potions.speed = love.graphics.newImage("Assets/potion_speed.png")
     potions.nightvision = love.graphics.newImage("Assets/potion_nightvision.png")
     potions.underwater = love.graphics.newImage("Assets/potion_underwater.png")
     potions.endurance = love.graphics.newImage("Assets/potion_endurance.png")
+
+    ingredients.spinach = love.graphics.newImage("Assets/spinach.png")
+    ingredients.coffee = love.graphics.newImage("Assets/coffee.png")
+    ingredients.cat_eyes = love.graphics.newImage("Assets/cat_eyes.png")
+    ingredients.camel_hump = love.graphics.newImage("Assets/camel_hump.png")
+    ingredients.seaweed = love.graphics.newImage("Assets/seaweed.png")
+
     music = love.audio.newSource("Assets/elevator_music.wav", "static")
     music:setLooping(true)
     music:play()
@@ -64,6 +104,18 @@ function love.load()
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
+
+    for i = 1, num_x_plots do
+        game_state.garden_contents[i] = {}
+    end
+
+    spinach_cursor = love.mouse.newCursor("Assets/spinach.png", 8, 8)
+    coffee_cursor = love.mouse.newCursor("Assets/coffee.png", 8, 8)
+    cat_eyes_cursor = love.mouse.newCursor("Assets/cat_eyes.png", 8, 8)
+    camel_hump_cursor = love.mouse.newCursor("Assets/camel_hump.png", 8, 8)
+    seaweed_cursor = love.mouse.newCursor("Assets/seaweed.png", 8, 8)
+    arrow_cursor = love.mouse.getSystemCursor("arrow")
+
 end
 
 function love.update(delta)
@@ -114,6 +166,32 @@ function love.update(delta)
             if is_colliding({x=x, y=y}, goto_store_button) then
                 music:play()
                 game_state.current_location = "store"
+                selected_ingredient = nil
+            elseif is_colliding({x=x, y=y}, spinach_button_box) then
+                selected_ingredient = "spinach" 
+            elseif is_colliding({x=x, y=y}, coffee_button_box) then
+                selected_ingredient = "coffee" 
+            elseif is_colliding({x=x, y=y}, cat_eyes_button_box) then
+                selected_ingredient = "cat_eyes" 
+            elseif is_colliding({x=x, y=y}, camel_hump_button_box) then
+                selected_ingredient = "camel_hump" 
+            elseif is_colliding({x=x, y=y}, seaweed_button_box) then
+                selected_ingredient = "seaweed" 
+            else
+                local garden_plot_clicked = false
+                -- Check if colliding with plot
+                for i = 1, num_x_plots do
+                    for j = 1, num_y_plots do
+                        if is_colliding({x=x, y=y}, garden_plots[i][j]) then
+                            garden_plot_clicked = true
+                            game_state.garden_contents[i][j] = selected_ingredient
+                        end
+                    end
+                end
+
+                if garden_plot_clicked == false then
+                    selected_ingredient = nil
+                end
             end
         end
     end
@@ -139,6 +217,22 @@ function love.draw()
         draw_inventory()
     elseif game_state.current_location == "garden" then
         love.graphics.draw(garden, 0, 0, 0, 3, 3)
+        draw_garden_plots()
+        draw_garden_menu()
+
+        if selected_ingredient == "spinach" then
+            love.mouse.setCursor(spinach_cursor)
+        elseif selected_ingredient == "coffee" then
+            love.mouse.setCursor(coffee_cursor)
+        elseif selected_ingredient == "cat_eyes" then
+            love.mouse.setCursor(cat_eyes_cursor)
+        elseif selected_ingredient == "camel_hump" then
+            love.mouse.setCursor(camel_hump_cursor)
+        elseif selected_ingredient == "seaweed" then
+            love.mouse.setCursor(seaweed_cursor)
+        else
+            love.mouse.setCursor(arrow_cursor)
+        end
     end
 
     if game_state.paused then love.graphics.print("PAUSED. Press escape to unpause.") end
@@ -149,6 +243,8 @@ function is_colliding(point, box)
 end
 
 function draw_inventory()
+
+
     love.graphics.draw(potions.strength, 540, 375, 0, 3, 3)
     love.graphics.draw(potions.speed, 720, 375, 0, 3, 3)
     love.graphics.draw(potions.nightvision, 540, 470, 0, 3, 3)
@@ -160,6 +256,53 @@ function draw_inventory()
     love.graphics.print(game_state.inventory:get_nightvision(), 600, 472)
     love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
     love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
+end
+
+function draw_garden_plots()
+    local plot_offset = {x=22, y=22}
+
+    for i = 1, num_x_plots do
+        for j =1, num_y_plots do
+            if game_state.garden_contents[i][j] ~= nil then
+                love.graphics.rectangle("line", garden_plots[i][j].x, garden_plots[i][j].y, garden_plots[i][j].width, garden_plots[i][j].height)
+                
+                if game_state.garden_contents[i][j] == "spinach" then
+                    love.graphics.draw(ingredients.spinach, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
+                elseif game_state.garden_contents[i][j] == "coffee" then
+                    love.graphics.draw(ingredients.coffee, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
+                elseif game_state.garden_contents[i][j] == "cat_eyes" then
+                    love.graphics.draw(ingredients.cat_eyes, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
+                elseif game_state.garden_contents[i][j] == "camel_hump" then
+                    love.graphics.draw(ingredients.camel_hump, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
+                elseif game_state.garden_contents[i][j] == "seaweed" then
+                    love.graphics.draw(ingredients.seaweed, garden_plots[i][j].x+plot_offset.x, garden_plots[i][j].y+plot_offset.y, 0, 3, 3)
+                end
+            end
+        end
+    end
+end
+
+function draw_garden_menu()
+
+    love.graphics.draw(ingredient_bubble, 15, 15)
+    love.graphics.draw(ingredient_bubble, 15, 85)
+    love.graphics.draw(ingredient_bubble, 15, 155)
+    love.graphics.draw(ingredient_bubble, 15, 225)
+    love.graphics.draw(ingredient_bubble, 15, 295)
+
+    love.graphics.draw(ingredients.spinach, 22, 20, 0, 3, 3)
+    love.graphics.draw(ingredients.coffee, 22, 90, 0, 3, 3)
+    love.graphics.draw(ingredients.cat_eyes, 22, 160, 0, 3, 3)
+    love.graphics.draw(ingredients.camel_hump, 22, 230, 0, 3, 3)
+    love.graphics.draw(ingredients.seaweed, 22, 300, 0, 3, 3)
+
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("Spinach", 80, 40)
+    love.graphics.print("Coffee", 80, 110)
+    love.graphics.print("Cat Eyes", 80, 180)
+    love.graphics.print("Camel's Hump", 80, 250)
+    love.graphics.print("Seaweed", 80, 320)
+    love.graphics.setColor(1, 1, 1)
 end
 
 function draw_conversation(active_customer)
