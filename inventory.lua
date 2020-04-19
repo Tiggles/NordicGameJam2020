@@ -117,15 +117,15 @@ function Inventory:use_potion(power)
 end
 
 function Inventory:add_potion(power)
-    if power == "Speed" then
+    if power == "speed" then
         self.potions.speed_potions = self.potions.speed_potions + 1
-    elseif power == "Strength" then
+    elseif power == "strength" then
         self.potions.strength_potions = self.potions.strength_potions + 1
-    elseif power == "Underwater Breathing" then
+    elseif power == "underwater" then
         self.potions.underwater_breathing_potions = self.potions.underwater_breathing_potions + 1
-    elseif power == "Night Vision" then
+    elseif power == "nightvision" then
         self.potions.nightvision_potions = self.potions.nightvision_potions + 1
-    elseif power == "Endurance" then
+    elseif power == "endurance" then
         self.potions.endurance_potions = self.potions.endurance_potions + 1
     else
         print("#ERROR: " .. power " not handled")

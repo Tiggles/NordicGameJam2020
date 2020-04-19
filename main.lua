@@ -16,8 +16,23 @@ local arrow_right
 local garden
 local music
 local potions = {}
+local potion_positions = {
+    strength = {x=540, y=375, width=48, height=48},
+    speed = {x=720, y=375, width=48, height=48},
+    nightvision = {x=540, y=470, width=48, height=48},
+    endurance = {x=720, y=470, width=48, height=48},
+    underwater = {x=630, y=560, width=48, height=48}
+}
+local potion_times = {
+    strength = 10,
+    speed = 10,
+    endurance = 10,
+    nightvision = 10,
+    underwater = 10
+}
 local ingredients = {}
 local selected_ingredient
+local selected_potion
 local response_bubble
 local ingredient_bubble
 local customer_sprites = {}
@@ -27,6 +42,11 @@ local coffee_cursor
 local cat_eyes_cursor
 local camel_hump_cursor
 local seaweed_cursor
+local potion_strength_cursor
+local potion_speed_cursor
+local potion_endurance_cursor
+local potion_nightvision_cursor
+local potion_underwater_cursor
 local arrow_cursor
 local showing_upgrades = false
 local responses = {
@@ -62,7 +82,10 @@ local game_state = {
         postpone = responses.postpone[love.math.random(#responses.postpone)],
         decline = responses.decline[love.math.random(#responses.decline)]
     },
-    cauldrons = {},
+    cauldrons = {
+        a = {x=300, y=200, width=76, height=81, content = {}},
+        b = {x=390, y=200, width=76, height=81, content = {}}
+    },
     money = 200,
     current_location = "menu",
     garden_contents = {}
@@ -112,6 +135,7 @@ local draw = function() end
 function love.load()
     love.graphics.setDefaultFilter( "nearest", "nearest")
     store = love.graphics.newImage("Assets/store.png")
+    cauldron_full = love.graphics.newImage("Assets/cauldron_full.png")
     store_closed = love.graphics.newImage("Assets/store_closed.png")
     witch_front = love.graphics.newImage("Assets/witch_front.png")
     witch_back = love.graphics.newImage("Assets/witch_back.png")
@@ -149,6 +173,11 @@ function love.load()
     cat_eyes_cursor = love.mouse.newCursor("Assets/cat_eyes.png", 8, 8)
     camel_hump_cursor = love.mouse.newCursor("Assets/camel_hump.png", 8, 8)
     seaweed_cursor = love.mouse.newCursor("Assets/seaweed.png", 8, 8)
+    potion_strength_cursor = love.mouse.newCursor("Assets/potion_strength.png", 8, 8)
+    potion_speed_cursor = love.mouse.newCursor("Assets/potion_speed.png", 8, 8)
+    potion_endurance_cursor = love.mouse.newCursor("Assets/potion_endurance.png", 8, 8)
+    potion_nightvision_cursor = love.mouse.newCursor("Assets/potion_nightvision.png", 8, 8)
+    potion_underwater_cursor = love.mouse.newCursor("Assets/potion_underwater.png", 8, 8)
     arrow_cursor = love.mouse.getSystemCursor("arrow")
 
 end
@@ -215,6 +244,28 @@ function love.update(delta)
         end
     end
 
+    -- update cauldron times
+    if game_state.cauldrons.a.content.name ~= nil then
+        if game_state.cauldrons.a.content.time_left > 0 then
+            game_state.cauldrons.a.content.time_left = game_state.cauldrons.a.content.time_left - delta
+        end
+
+        if game_state.cauldrons.a.content.time_left < 0 then
+            game_state.cauldrons.a.content.time_left = 0
+        end
+    end
+
+    if game_state.cauldrons.b.content.name ~= nil then
+        if game_state.cauldrons.b.content.time_left > 0 then
+            game_state.cauldrons.b.content.time_left = game_state.cauldrons.b.content.time_left - delta
+        end
+
+        if game_state.cauldrons.b.content.time_left < 0 then
+            game_state.cauldrons.b.content.time_left = 0
+        end
+    end
+
+
     if game_state.current_location == "store" then
         if not game_state.clock:is_open() and love.keyboard.isDown("space") then
             game_state.clock:skip_to_open()
@@ -263,7 +314,7 @@ function love.update(delta)
                     table.remove(game_state.customers, 1)
                     action_happened = true
                     next_action_allowed = love.timer.getTime() + 0.2
-                else
+               else
                     print("None")
                 end
 
@@ -275,9 +326,51 @@ function love.update(delta)
                     }
                 end
             end
+
             if is_colliding({x=x, y=y}, goto_garden_button) then
+                selected_potion = nil
                 game_state.current_location = "garden"
                 music:pause()
+            elseif is_colliding({x=x, y=y}, game_state.cauldrons.a) then
+                print("cauldron a clicked",game_state.cauldrons.a.content.name,selected_potion)
+
+                if game_state.cauldrons.a.content.name == nil and selected_potion ~= nil then
+                    game_state.cauldrons.a.content.name = selected_potion
+                    game_state.cauldrons.a.content.time_left = potion_times[selected_potion]
+                end
+
+                if game_state.cauldrons.a.content.name ~= nil then
+                    if game_state.cauldrons.a.content.time_left == 0 then
+                        selected_potion = nil
+                        game_state.inventory:add_potion(game_state.cauldrons.a.content.name)
+                        game_state.cauldrons.a.content = {}
+                    end
+                end
+            elseif is_colliding({x=x, y=y}, game_state.cauldrons.b) then
+                if game_state.cauldrons.b.content.name == nil and selected_potion ~= nil then
+                    game_state.cauldrons.b.content.name = selected_potion
+                    game_state.cauldrons.b.content.time_left = potion_times[selected_potion]
+                end
+
+                if game_state.cauldrons.b.content.name ~= nil then
+                    if game_state.cauldrons.b.content.time_left == 0 then
+                        selected_potion = nil
+                        game_state.inventory:add_potion(game_state.cauldrons.b.content.name)
+                        game_state.cauldrons.b.content = {}
+                    end
+                end
+            elseif is_colliding({x=x, y=y}, potion_positions.strength) then
+                selected_potion = "strength"
+            elseif is_colliding({x=x, y=y}, potion_positions.speed) then
+                selected_potion = "speed"
+            elseif is_colliding({x=x, y=y}, potion_positions.endurance) then
+                selected_potion = "endurance"
+            elseif is_colliding({x=x, y=y}, potion_positions.nightvision) then
+                selected_potion = "nightvision"
+            elseif is_colliding({x=x, y=y}, potion_positions.underwater) then
+                selected_potion = "underwater"
+            else
+                selected_potion = nil
             end
         end
     elseif game_state.current_location == "garden" then
@@ -360,7 +453,19 @@ function love.draw()
     local active_customer = game_state.customers[1] ~= nil
 
     if game_state.current_location == "store" then
-        love.mouse.setCursor(arrow_cursor)
+        if selected_potion == "strength" then
+            love.mouse.setCursor(potion_strength_cursor)
+        elseif selected_potion == "speed" then
+            love.mouse.setCursor(potion_speed_cursor)
+        elseif selected_potion == "endurance" then
+            love.mouse.setCursor(potion_endurance_cursor)
+        elseif selected_potion == "nightvision" then
+            love.mouse.setCursor(potion_nightvision_cursor)
+        elseif selected_potion == "underwater" then
+            love.mouse.setCursor(potion_underwater_cursor)
+        else
+            love.mouse.setCursor(arrow_cursor)
+        end
         if game_state.clock:is_open() then
             love.graphics.draw(store, 0, 0, 0, 3, 3)
         else
@@ -376,6 +481,7 @@ function love.draw()
 
         draw_conversation(active_customer)
         draw_inventory()
+        draw_cauldrons()
     elseif game_state.current_location == "garden" then
         love.graphics.draw(garden, 0, 0, 0, 3, 3)
         draw_garden_plots()
@@ -422,11 +528,11 @@ function draw_inventory()
     love.graphics.setColor(1, 1, 1)
 
     if game_state.inventory.page == 1 then -- potions
-        love.graphics.draw(potions.strength, 540, 375, 0, 3, 3)
-        love.graphics.draw(potions.speed, 720, 375, 0, 3, 3)
-        love.graphics.draw(potions.nightvision, 540, 470, 0, 3, 3)
-        love.graphics.draw(potions.endurance, 720, 470, 0, 3, 3)
-        love.graphics.draw(potions.underwater, 630, 560, 0, 3, 3)
+        love.graphics.draw(potions.strength, potion_positions.strength.x, potion_positions.strength.y, 0, 3, 3)
+        love.graphics.draw(potions.speed, potion_positions.speed.x, potion_positions.speed.y, 0, 3, 3)
+        love.graphics.draw(potions.nightvision, potion_positions.nightvision.x, potion_positions.nightvision.y, 0, 3, 3)
+        love.graphics.draw(potions.endurance, potion_positions.endurance.x, potion_positions.endurance.y, 0, 3, 3)
+        love.graphics.draw(potions.underwater, potion_positions.underwater.x, potion_positions.underwater.y, 0, 3, 3)
 
         love.graphics.print(game_state.inventory:get_strength(), 600, 382)
         love.graphics.print(game_state.inventory:get_speed(), 780, 382)
@@ -446,6 +552,60 @@ function draw_inventory()
         love.graphics.print(game_state.inventory:get_camel_hump(), 780, 472)
         love.graphics.print(game_state.inventory:get_seaweed(), 690, 572)
     end
+end
+
+function draw_cauldrons()
+    love.graphics.draw(cauldron_full, game_state.cauldrons.a.x, game_state.cauldrons.a.y, 0, 3, 3)
+    love.graphics.draw(cauldron_full, game_state.cauldrons.b.x, game_state.cauldrons.b.y, 0, 3, 3)
+
+    if game_state.cauldrons.a.content.name ~= nil then
+        if game_state.cauldrons.a.content.name == "strength" then
+            love.graphics.draw(potions.strength, game_state.cauldrons.a.x+16, game_state.cauldrons.a.y-30, 0, 3, 3)
+        elseif game_state.cauldrons.a.content.name == "speed" then
+            love.graphics.draw(potions.speed, game_state.cauldrons.a.x+16, game_state.cauldrons.a.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.a.content.name == "endurance" then
+            love.graphics.draw(potions.endurance, game_state.cauldrons.a.x+16, game_state.cauldrons.a.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.a.content.name == "nightvision" then
+            love.graphics.draw(potions.nightvision, game_state.cauldrons.a.x+16, game_state.cauldrons.a.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.a.content.name == "underwater" then
+            love.graphics.draw(potions.underwater, game_state.cauldrons.a.x+16, game_state.cauldrons.a.y-30, 0, 3, 3)
+        end
+
+        local time_text = "?"
+
+        if game_state.cauldrons.a.content.time_left == 0 then
+            time_text = "Done"
+        else
+            time_text = math.ceil(game_state.cauldrons.a.content.time_left)
+        end
+
+        love.graphics.print(time_text, game_state.cauldrons.a.x+30, game_state.cauldrons.a.y+30)
+    end
+
+    if game_state.cauldrons.b.content.name ~= nil then
+        if game_state.cauldrons.b.content.name == "strength" then
+            love.graphics.draw(potions.strength, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
+        elseif game_state.cauldrons.b.content.name == "speed" then
+            love.graphics.draw(potions.speed, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.b.content.name == "endurance" then
+            love.graphics.draw(potions.endurance, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.b.content.name == "nightvision" then
+            love.graphics.draw(potions.nightvision, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
+        elseif  game_state.cauldrons.b.content.name == "underwater" then
+            love.graphics.draw(potions.underwater, game_state.cauldrons.b.x+16, game_state.cauldrons.b.y-30, 0, 3, 3)
+        end
+
+        local time_text = "?"
+
+        if game_state.cauldrons.b.content.time_left == 0 then
+            time_text = "Done"
+        else
+            time_text = math.ceil(game_state.cauldrons.b.content.time_left)
+        end
+
+        love.graphics.print(time_text, game_state.cauldrons.b.x+30, game_state.cauldrons.b.y+30)
+    end
+
 end
 
 function draw_garden_plots()
