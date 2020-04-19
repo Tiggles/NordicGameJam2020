@@ -253,8 +253,8 @@ function love.update(delta)
             local x, y = love.mouse.getPosition()
             if is_colliding({x=x, y=y}, goto_store_button) then
                 music:play()
-                game_state.current_location = "store"
                 selected_ingredient = nil
+                game_state.current_location = "store"
             elseif is_colliding({x=x, y=y}, spinach_button_box) then
                 selected_ingredient = "spinach"
             elseif is_colliding({x=x, y=y}, coffee_button_box) then
@@ -295,6 +295,7 @@ function love.draw()
     local active_customer = game_state.customers[1] ~= nil
 
     if game_state.current_location == "store" then
+        love.mouse.setCursor(arrow_cursor)
         if game_state.clock:is_open() then
             love.graphics.draw(store, 0, 0, 0, 3, 3)
         else
