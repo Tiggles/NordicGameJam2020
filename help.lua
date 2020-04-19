@@ -2,8 +2,7 @@ HELP_SHOP = [[
     You run a small potion shop in the city.
     In your opening hours every day from
     10:00 to 18:00, customers will come to you
-    with their problems. The better you do, the
-    higher the rate of customers will become.
+    with their problems.
 
     You are closed on sundays.
 ]]
