@@ -65,3 +65,10 @@ function Help:next_page(game_state)
 
 end
 
+
+INGREDIENTS_WARNING = [[
+        You need at least
+      two of and ingredient.
+]]
+
+CUSTOMER_LEFT = "Customer left."

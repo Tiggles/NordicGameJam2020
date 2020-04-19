@@ -124,6 +124,7 @@ local plot_width = 97
 local plot_height = 97
 local num_x_plots = 5
 local num_y_plots = 5
+local message = { message = "", expiration = 0 }
 local garden_plots = {}
 
 for i = 1, num_x_plots do
@@ -255,12 +256,7 @@ function love.load()
 end
 
 function love.update(delta)
---[[ 
-    if love.keyboard.isDown("p") then
-        love.graphics.captureScreenshot(os.time() .. ".png")
-        love.event.quit()
-    end ]]
-
+    print(message.expiration)
     if game_state.current_location == "menu" then
         if love.mouse.isDown("1") and next_action_allowed < love.timer.getTime()  then
             local x, y = love.mouse.getPosition()
@@ -298,8 +294,12 @@ function love.update(delta)
         game_state.customers[i].time_bonus = game_state.customers[i].time_bonus - (delta * 10)
         if game_state.customers[i].time_bonus <= 0 then
             table.remove(game_state.customers, i)
+            message.message = CUSTOMER_LEFT
+            message.expiration = 1
         end
     end
+
+    message.expiration = message.expiration - delta
 
     local active_customer = game_state.customers[1] ~= nil
 
@@ -312,7 +312,11 @@ function love.update(delta)
         next_customer_allowed = love.timer.getTime() + 10 + math.random(6)
     end
 
-    if not game_state.clock:is_open() and #game_state.customers > 0 then game_state.customers = {} end
+    if not game_state.clock:is_open() and #game_state.customers > 0 then
+        game_state.customers = {}
+        message.message = "Shop closed"
+        message.expiration = 51000
+    end
 
     -- update garden times
     for i = 1, num_x_plots do
@@ -407,6 +411,9 @@ function love.update(delta)
                         use_ingredients(selected_potion)
                         game_state.cauldrons.a.content.name = selected_potion
                         game_state.cauldrons.a.content.time_left = potion_times[selected_potion]
+                    else
+                        message.message = INGREDIENTS_WARNING
+                        message.expiration = 2
                     end
                 end
 
@@ -423,6 +430,9 @@ function love.update(delta)
                         use_ingredients(selected_potion)
                         game_state.cauldrons.b.content.name = selected_potion
                         game_state.cauldrons.b.content.time_left = potion_times[selected_potion]
+                    else
+                        message.message = INGREDIENTS_WARNING
+                        message.expiration = 2
                     end
                 end
 
@@ -439,6 +449,9 @@ function love.update(delta)
                         use_ingredients(selected_potion)
                         game_state.cauldrons.c.content.name = selected_potion
                         game_state.cauldrons.c.content.time_left = potion_times[selected_potion]
+                    else
+                        message.message = INGREDIENTS_WARNING
+                        message.expiration = 2
                     end
                 end
 
@@ -455,6 +468,9 @@ function love.update(delta)
                         use_ingredients(selected_potion)
                         game_state.cauldrons.d.content.name = selected_potion
                         game_state.cauldrons.d.content.time_left = potion_times[selected_potion]
+                    else
+                        message.message = INGREDIENTS_WARNING
+                        message.expiration = 2
                     end
                 end
 
@@ -669,6 +685,13 @@ function love.draw()
         draw_conversation(active_customer)
         draw_inventory()
         draw_cauldrons()
+
+        if message.message ~= "" and message.expiration > 0 then
+            love.graphics.draw(help.small_message, 350, 580)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print(message.message, 350, 595)
+            love.graphics.setColor(1, 1, 1)
+        end
     elseif game_state.current_location == "garden" then
         love.graphics.draw(garden, 0, 0, 0, 3, 3)
         draw_garden_plots()
