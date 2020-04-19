@@ -275,8 +275,8 @@ function love.update(delta)
             local x, y = love.mouse.getPosition()
             if is_colliding({x=x, y=y}, goto_store_button) then
                 music:play()
-                game_state.current_location = "store"
                 selected_ingredient = nil
+                game_state.current_location = "store"
             elseif is_colliding({x=x, y=y}, spinach_button_box) then
                 selected_ingredient = "spinach"
             elseif is_colliding({x=x, y=y}, coffee_button_box) then
@@ -294,8 +294,19 @@ function love.update(delta)
                     for j = 1, num_y_plots do
                         if is_colliding({x=x, y=y}, garden_plots[i][j]) then
                             garden_plot_clicked = true
-                            game_state.garden_contents[i][j].name = selected_ingredient
-                            game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
+
+                            if game_state.garden_contents[i][j].name == nil then
+                                game_state.garden_contents[i][j].name = selected_ingredient
+                                game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
+                            else
+                                if game_state.garden_contents[i][j].time_left == 0 then
+                                    selected_ingredient = nil
+                                    game_state.inventory:add_ingredient(game_state.garden_contents[i][j].name)
+                                    game_state.garden_contents[i][j] = {}
+                                end
+                            end
+
+
                         end
                     end
                 end
@@ -334,6 +345,7 @@ function love.draw()
     local active_customer = game_state.customers[1] ~= nil
 
     if game_state.current_location == "store" then
+        love.mouse.setCursor(arrow_cursor)
         if game_state.clock:is_open() then
             love.graphics.draw(store, 0, 0, 0, 3, 3)
         else
