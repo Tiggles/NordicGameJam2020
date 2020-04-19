@@ -8,6 +8,7 @@ local store
 local witch_front
 local witch_back
 local garden
+local music
 local potions = {}
 local response_bubble
 local customer_sprites = {}
@@ -56,6 +57,9 @@ function love.load()
     potions.nightvision = love.graphics.newImage("Assets/potion_nightvision.png")
     potions.underwater = love.graphics.newImage("Assets/potion_underwater.png")
     potions.endurance = love.graphics.newImage("Assets/potion_endurance.png")
+    music = love.audio.newSource("Assets/elevator_music.wav", "static")
+    music:setLooping(true)
+    music:play()
     table.insert(customer_sprites, love.graphics.newImage("Assets/customer_blue.png"))
     table.insert(game_state.customers, Customer:new())
     table.insert(game_state.customers, Customer:new())
@@ -100,6 +104,7 @@ function love.update(delta)
             end
             if is_colliding({x=x, y=y}, goto_garden_button) then
                 game_state.current_location = "garden"
+                music:pause()
             else
             end
         end
@@ -107,6 +112,7 @@ function love.update(delta)
         if love.mouse.isDown("1") then
             local x, y = love.mouse.getPosition()
             if is_colliding({x=x, y=y}, goto_store_button) then
+                music:play()
                 game_state.current_location = "store"
             end
         end
