@@ -375,7 +375,11 @@ function love.draw()
 
     if game_state.current_location == "help" then
         if game_state.help.page == 1 then
+            love.graphics.draw(help.store)
+            love.graphics.draw(help.big_message)
+            love.graphics.setColor(0, 0, 0)
             love.graphics.print(HELP_SHOP, 0, 20)
+            love.graphics.setColor(1, 1, 1)
         elseif game_state.help.page == 2 then
             love.graphics.draw(help.store)
             love.graphics.draw(help.big_message, 120, 100)
@@ -387,10 +391,17 @@ function love.draw()
 
         elseif game_state.help.page == 3 then
             love.graphics.draw(help.garden)
+            love.graphics.draw(help.big_message, 400, 20)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print(HELP_GARDEN, 400, 35)
+            love.graphics.setColor(1, 1, 1)
         elseif game_state.help.page == 4 then
-            love.graphics.print("BREW TODO!")
-            
+            love.graphics.print("BREW TODO!") 
         end
+        love.graphics.draw(help.small_message, 350, 580)
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.print(HELP_NEXT, 350, 595)
+        love.graphics.setColor(1, 1, 1)
         return
     end
 

@@ -1,9 +1,14 @@
 HELP_SHOP = [[
     You run a small potion shop in the city.
-    In your opening hours every day from 10:00 to 18:00, customers will come to with their problems.
-    The better you do, the higher the rate of customers will become.
+    In your opening hours every day from
+    10:00 to 18:00, customers will come to you
+    with their problems. The better you do, the
+    higher the rate of customers will become.
+]]
 
-    Click space or left mouse button to continue. 
+HELP_NEXT = [[
+    Click space or left mouse
+    button to continue. 
 ]]
 
 HELP_CONVERSATION = [[ 
@@ -24,8 +29,12 @@ HELP_INVENTORY = [[
 ]]
 
 HELP_GARDEN = [[
-    In your garden, you can plant ingredients. After a certain amount of time, they can be picked,
-    and used for brewing potions. Every ingredient has a price to plant, except seaweed.
+    In your garden, you can plant ingredients. After
+    a certain amount of time, they can be picked,
+    and used for brewing potions.
+    
+    Every ingredient has a price to plant,
+    except seaweed.
 ]]
 
 HELP_BREWING = [[
@@ -44,7 +53,7 @@ Help = {}
 function Help:new()
     local help = {
         page = 1,
-        page_count = 5
+        page_count = 4
     }
     self.__index = self
     return setmetatable(help, self)
