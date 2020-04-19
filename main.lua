@@ -212,6 +212,14 @@ function love.update(delta)
         if not game_state.clock:is_open() and love.keyboard.isDown("space") then
             game_state.clock:skip_to_open()
         end
+        local x, y = love.mouse.getPosition()
+        if love.mouse.isDown("1") then
+            if is_colliding({x=x, y=y}, inventory_left_box) then
+                game_state.inventory:previous_page()
+            elseif is_colliding({x=x, y=y}, inventory_right_box) then
+                game_state.inventory:next_page()
+            end
+        end
 
         if game_state.clock.hours == game_state.clock.opening_hour and #game_state.postponed_customers > 0 then
             for i = #game_state.postponed_customers, 1, -1 do
@@ -225,7 +233,6 @@ function love.update(delta)
         end
 
         if love.mouse.isDown("1") then
-            local x, y = love.mouse.getPosition()
             local action_happened = false
             if active_customer and next_action_allowed < love.timer.getTime() then
                 if is_colliding({x = x, y = y}, accept_box) then
@@ -249,10 +256,6 @@ function love.update(delta)
                     table.remove(game_state.customers, 1)
                     action_happened = true
                     next_action_allowed = love.timer.getTime() + 0.2
-                elseif is_colliding({x=x, y=y}, inventory_left_box) then
-                    game_state.inventory:previous_page()
-                elseif is_colliding({x=x, y=y}, inventory_right_box) then
-                    game_state.inventory:next_page()
                 else
                     print("None")
                 end
