@@ -4,6 +4,7 @@ require "clock"
 
 local debug = false
 local next_action_allowed = 0
+local next_customer_allowed = math.random(6)
 
 local store
 local store_closed
@@ -26,7 +27,7 @@ local game_state = {
     finished_customers = {},
     postponed_customers = {},
     paused = false,
-    clock = Clock:new(10, 18, 10, 0),
+    clock = Clock:new(10, 18, 10, 0, 120),
     queued_response = {
         accept = responses.accept[love.math.random(#responses.accept)],
         postpone = responses.postpone[love.math.random(#responses.postpone)],
@@ -64,9 +65,6 @@ function love.load()
     music:setLooping(true)
     music:play()
     table.insert(customer_sprites, love.graphics.newImage("Assets/customer_blue.png"))
-    table.insert(game_state.customers, Customer:new())
-    table.insert(game_state.customers, Customer:new())
-    table.insert(game_state.customers, Customer:new())
 end
 
 function love.update(delta)
@@ -83,9 +81,15 @@ function love.update(delta)
         game_state.clock:update(delta)
     end
 
-    print(game_state.clock:to_string())
+    if game_state.clock:is_open() and next_customer_allowed < love.timer.getTime() then
+        table.insert(game_state.customers, Customer:new())
+        next_customer_allowed = love.timer.getTime() + 10 + math.random(6)
+    end
 
     if game_state.current_location == "store" then
+        if not game_state.clock:is_open() and love.keyboard.isDown("space") then
+            game_state.clock:skip_to_open()
+        end
         if love.mouse.isDown("1") then
             local x, y = love.mouse.getPosition()
             if active_customer and next_action_allowed < love.timer.getTime() then
@@ -140,12 +144,15 @@ function love.draw()
             love.graphics.draw(store, 0, 0, 0, 3, 3)
         else
             love.graphics.draw(store_closed, 0, 0, 0, 3, 3)
+            -- love.graphics.print("Press space to skip to open hours.")
         end
 
         for i = 1, #game_state.customers do
             local c = game_state.customers[i]
             love.graphics.draw(customer_sprites[c.color], 190, 220 + i * 60, 0, 4, 4)
         end
+
+        love.graphics.print(game_state.clock:to_string())
 
         draw_conversation(active_customer)
         draw_inventory()
