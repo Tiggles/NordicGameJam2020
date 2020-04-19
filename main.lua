@@ -83,7 +83,7 @@ potion_price["Speed"] = 400
 potion_price["Strength"] = 150
 potion_price["Underwater Breathing"] = 50
 potion_price["Night Vision"] = 1200
-potion_price["Endurance"] = 4000
+potion_price["Endurance"] = 1500
 
 local game_state = {
     help = Help:new(),
@@ -745,11 +745,24 @@ function draw_inventory()
         love.graphics.draw(potions.endurance, potion_positions.endurance.x, potion_positions.endurance.y, 0, 3, 3)
         love.graphics.draw(potions.underwater, potion_positions.underwater.x, potion_positions.underwater.y, 0, 3, 3)
 
-        love.graphics.print(game_state.inventory:get_strength(), 600, 382)
-        love.graphics.print(game_state.inventory:get_speed(), 780, 382)
-        love.graphics.print(game_state.inventory:get_nightvision(), 600, 472)
-        love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
-        love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
+        love.graphics.print("Quantity: "..game_state.inventory:get_strength(), 590, 382)
+        love.graphics.print("Quantity: "..game_state.inventory:get_speed(), 770, 382)
+        love.graphics.print("Quantity: "..game_state.inventory:get_nightvision(), 590, 472)
+        love.graphics.print("Quantity: "..game_state.inventory:get_endurance(), 770, 472)
+        love.graphics.print("Quantity: "..game_state.inventory:get_underwater_breathing(), 680, 572)
+
+        love.graphics.draw(coin, 590, 402, 0, 2, 2)
+        love.graphics.draw(coin, 770, 402, 0, 2, 2)
+        love.graphics.draw(coin, 590, 492, 0, 2, 2)
+        love.graphics.draw(coin, 770, 492, 0, 2, 2)
+        love.graphics.draw(coin, 680, 592, 0, 2, 2)
+
+        love.graphics.print(potion_price["Strength"], 610, 402)
+        love.graphics.print(potion_price["Speed"], 790, 402)
+        love.graphics.print(potion_price["Night Vision"], 610, 492)
+        love.graphics.print(potion_price["Endurance"], 790, 492)
+        love.graphics.print(potion_price["Underwater Breathing"], 700, 592)
+
     else -- inventory
         love.graphics.draw(ingredients.spinach, 540, 375, 0, 3, 3)
         love.graphics.draw(ingredients.coffee, 720, 375, 0, 3, 3)
@@ -757,11 +770,11 @@ function draw_inventory()
         love.graphics.draw(ingredients.camel_hump, 720, 470, 0, 3, 3)
         love.graphics.draw(ingredients.seaweed, 630, 560, 0, 3, 3)
 
-        love.graphics.print(game_state.inventory:get_spinach(), 600, 382)
-        love.graphics.print(game_state.inventory:get_coffee(), 780, 382)
-        love.graphics.print(game_state.inventory:get_cat_eyes(), 600, 472)
-        love.graphics.print(game_state.inventory:get_camel_hump(), 780, 472)
-        love.graphics.print(game_state.inventory:get_seaweed(), 690, 572)
+        love.graphics.print("Quantity: "..game_state.inventory:get_spinach(), 590, 382)
+        love.graphics.print("Quantity: "..game_state.inventory:get_coffee(), 770, 382)
+        love.graphics.print("Quantity: "..game_state.inventory:get_cat_eyes(), 590, 472)
+        love.graphics.print("Quantity: "..game_state.inventory:get_camel_hump(), 770, 472)
+        love.graphics.print("Quantity: "..game_state.inventory:get_seaweed(), 680, 572)
     end
 
     love.graphics.draw(coin, 500, 634, 0, 3, 3)
