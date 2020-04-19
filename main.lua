@@ -55,6 +55,7 @@ local potion_speed_cursor
 local potion_endurance_cursor
 local potion_nightvision_cursor
 local potion_underwater_cursor
+local buy_cauldron
 local arrow_cursor
 local showing_upgrades = false
 local responses = {
@@ -117,6 +118,8 @@ local game_state = {
     current_location = "menu",
     garden_contents = {}
 }
+
+local buy_cauldron_box = {x = 0, y = 528, width = 53 * 3, height = 14 * 3}
 
 local garden_plot_start_x = 236
 local garden_plot_start_y = 45
@@ -200,6 +203,7 @@ function love.load()
     love.filesystem.setIdentity("screenshot_example")
 
     love.graphics.setDefaultFilter( "nearest", "nearest")
+    buy_cauldron = love.graphics.newImage("Assets/upgrade_box.png")
     store = love.graphics.newImage("Assets/store.png")
     cauldron_full = love.graphics.newImage("Assets/cauldron_full.png")
     store_closed = love.graphics.newImage("Assets/store_closed.png")
@@ -271,7 +275,6 @@ function love.update(delta)
                 love.event.quit()
             end
         end
-
         return
     end
 
@@ -404,7 +407,19 @@ function love.update(delta)
 
         if love.mouse.isDown("1") then
             local action_happened = false
-            if is_colliding({x=x, y=y}, game_state.cauldrons.a) then
+
+            if is_colliding({x = x, y = y}, buy_cauldron_box) then
+                if game_state.upgrades.cauldrons < 4  and next_action_allowed < love.timer.getTime() then
+                    if game_state.inventory:has_enough_money(10000) then
+                        game_state.inventory:spend_money(10000)
+                        game_state.upgrades.cauldrons = game_state.upgrades.cauldrons + 1
+                        next_action_allowed = love.timer.getTime() + 0.2
+                    else
+                        message.message = "      Missing " .. 10000 - game_state.inventory.money .. " coins"
+                        message.expiration = 1.5
+                    end
+                end
+            elseif is_colliding({x=x, y=y}, game_state.cauldrons.a) then
                 if game_state.cauldrons.a.content.name == nil and selected_potion ~= nil then
                     if has_ingredients(selected_potion) then
                         use_ingredients(selected_potion)
@@ -688,12 +703,19 @@ function love.draw()
         draw_inventory()
         draw_cauldrons()
 
+        if game_state.upgrades.cauldrons < 4 then
+            love.graphics.draw(buy_cauldron, buy_cauldron_box.x, buy_cauldron_box.y, 0, 3, 3)
+            love.graphics.draw(coin, buy_cauldron_box.x + 142, buy_cauldron_box.y + 15)
+            love.graphics.print("New cauldron 10.000", buy_cauldron_box.x + 8, buy_cauldron_box.y + 12)
+        end
+
         if message.message ~= "" and message.expiration > 0 then
             love.graphics.draw(help.small_message, 350, 580)
             love.graphics.setColor(0, 0, 0)
             love.graphics.print(message.message, 355, 600)
             love.graphics.setColor(1, 1, 1)
         end
+
     elseif game_state.current_location == "garden" then
         love.graphics.draw(garden, 0, 0, 0, 3, 3)
         draw_garden_plots()
