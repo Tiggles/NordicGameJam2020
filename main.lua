@@ -86,6 +86,8 @@ function love.update(delta)
         next_customer_allowed = love.timer.getTime() + 10 + math.random(6)
     end
 
+    if not game_state.clock:is_open() and #game_state.customers > 0 then game_state.customers = {} end
+
     if game_state.current_location == "store" then
         if not game_state.clock:is_open() and love.keyboard.isDown("space") then
             game_state.clock:skip_to_open()
@@ -168,17 +170,19 @@ function is_colliding(point, box)
 end
 
 function draw_inventory()
-    love.graphics.draw(potions.strength, 540, 375, 0, 3, 3)
-    love.graphics.draw(potions.speed, 720, 375, 0, 3, 3)
-    love.graphics.draw(potions.nightvision, 540, 470, 0, 3, 3)
-    love.graphics.draw(potions.endurance, 720, 470, 0, 3, 3)
-    love.graphics.draw(potions.underwater, 630, 560, 0, 3, 3)
+    if game_state.inventory.page == 1 then
+        love.graphics.draw(potions.strength, 540, 375, 0, 3, 3)
+        love.graphics.draw(potions.speed, 720, 375, 0, 3, 3)
+        love.graphics.draw(potions.nightvision, 540, 470, 0, 3, 3)
+        love.graphics.draw(potions.endurance, 720, 470, 0, 3, 3)
+        love.graphics.draw(potions.underwater, 630, 560, 0, 3, 3)
 
-    love.graphics.print(game_state.inventory:get_strength(), 600, 382)
-    love.graphics.print(game_state.inventory:get_speed(), 780, 382)
-    love.graphics.print(game_state.inventory:get_nightvision(), 600, 472)
-    love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
-    love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
+        love.graphics.print(game_state.inventory:get_strength(), 600, 382)
+        love.graphics.print(game_state.inventory:get_speed(), 780, 382)
+        love.graphics.print(game_state.inventory:get_nightvision(), 600, 472)
+        love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
+        love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
+    end
 end
 
 function draw_conversation(active_customer)
