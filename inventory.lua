@@ -132,6 +132,22 @@ function Inventory:add_potion(power)
     end
 end
 
+function Inventory:use_ingredient(ingredient)
+    if ingredient == "spinach" then
+        self.ingredients.spinach = self.ingredients.spinach - 1
+    elseif ingredient == "coffee" then
+        self.ingredients.coffee = self.ingredients.coffee - 1
+    elseif ingredient == "cat_eyes" then
+        self.ingredients.cat_eyes = self.ingredients.cat_eyes - 1
+    elseif ingredient == "camel_hump" then
+        self.ingredients.camel_hump = self.ingredients.camel_hump - 1
+    elseif ingredient == "seaweed" then
+        self.ingredients.seaweed = self.ingredients.seaweed - 1
+    else
+        print("#ERROR: " .. ingredient " not handled")
+    end
+end
+
 function Inventory:add_ingredient(ingredient)
     if ingredient == "spinach" then
         self.ingredients.spinach = self.ingredients.spinach + 1

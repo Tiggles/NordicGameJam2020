@@ -24,6 +24,13 @@ local potion_positions = {
     endurance = {x=720, y=470, width=48, height=48},
     underwater = {x=630, y=560, width=48, height=48}
 }
+local potion_ingredients = {
+    strength = {spinach = 2},
+    speed = {coffee = 2},
+    nightvision = {cat_eyes = 2},
+    endurance = {camel_hump = 2},
+    underwater = {seaweed = 2}
+}
 local potion_times = {
     strength = 10,
     speed = 10,
@@ -139,6 +146,42 @@ local seaweed_button_box = {x = 15, y = 295, width = 249, height = 60}
 
 local update = function() end
 local draw = function() end
+
+function has_ingredients(potion)
+    for ingredient, needed_quantity in pairs(potion_ingredients[potion]) do
+        if ingredient == "spinach" then
+            if game_state.inventory:get_spinach() < needed_quantity then
+                return false
+            end
+        elseif ingredient == "coffee" then
+            if game_state.inventory:get_coffee() < needed_quantity then
+                return false
+            end
+        elseif ingredient == "cat_eyes" then
+            if game_state.inventory:get_cat_eyes() < needed_quantity then
+                return false
+            end
+
+        elseif ingredient == "camel_hump" then
+            if game_state.inventory:get_camel_hump() < needed_quantity then
+                return false
+            end
+        elseif ingredient == "seaweed" then
+            if game_state.inventory:get_seaweed() < needed_quantity then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+function use_ingredients(potion)
+    for ingredient, needed_quantity in pairs(potion_ingredients[potion]) do
+        for i = 1, needed_quantity do
+            game_state.inventory:use_ingredient(ingredient)
+        end
+    end
+end
 
 function love.load()
     love.filesystem.setIdentity("screenshot_example")
@@ -339,11 +382,12 @@ function love.update(delta)
             local action_happened = false
 
             if is_colliding({x=x, y=y}, game_state.cauldrons.a) then
-                print("cauldron a clicked",game_state.cauldrons.a.content.name,selected_potion)
-
                 if game_state.cauldrons.a.content.name == nil and selected_potion ~= nil then
-                    game_state.cauldrons.a.content.name = selected_potion
-                    game_state.cauldrons.a.content.time_left = potion_times[selected_potion]
+                    if has_ingredients(selected_potion) then
+                        use_ingredients(selected_potion)
+                        game_state.cauldrons.a.content.name = selected_potion
+                        game_state.cauldrons.a.content.time_left = potion_times[selected_potion]
+                    end
                 end
 
                 if game_state.cauldrons.a.content.name ~= nil then
@@ -355,8 +399,11 @@ function love.update(delta)
                 end
             elseif is_colliding({x=x, y=y}, game_state.cauldrons.b) then
                 if game_state.cauldrons.b.content.name == nil and selected_potion ~= nil then
-                    game_state.cauldrons.b.content.name = selected_potion
-                    game_state.cauldrons.b.content.time_left = potion_times[selected_potion]
+                    if has_ingredients(selected_potion) then
+                        use_ingredients(selected_potion)
+                        game_state.cauldrons.b.content.name = selected_potion
+                        game_state.cauldrons.b.content.time_left = potion_times[selected_potion]
+                    end
                 end
 
                 if game_state.cauldrons.b.content.name ~= nil then
@@ -368,8 +415,11 @@ function love.update(delta)
                 end
             elseif game_state.upgrades.cauldrons > 2 and is_colliding({x=x, y=y}, game_state.cauldrons.c) then
                 if game_state.cauldrons.c.content.name == nil and selected_potion ~= nil then
-                    game_state.cauldrons.c.content.name = selected_potion
-                    game_state.cauldrons.c.content.time_left = potion_times[selected_potion]
+                    if has_ingredients(selected_potion) then
+                        use_ingredients(selected_potion)
+                        game_state.cauldrons.c.content.name = selected_potion
+                        game_state.cauldrons.c.content.time_left = potion_times[selected_potion]
+                    end
                 end
 
                 if game_state.cauldrons.c.content.name ~= nil then
@@ -381,8 +431,11 @@ function love.update(delta)
                 end
             elseif game_state.upgrades.cauldrons > 3 and is_colliding({x=x, y=y}, game_state.cauldrons.d) then
                 if game_state.cauldrons.d.content.name == nil and selected_potion ~= nil then
-                    game_state.cauldrons.d.content.name = selected_potion
-                    game_state.cauldrons.d.content.time_left = potion_times[selected_potion]
+                    if has_ingredients(selected_potion) then
+                        use_ingredients(selected_potion)
+                        game_state.cauldrons.d.content.name = selected_potion
+                        game_state.cauldrons.d.content.time_left = potion_times[selected_potion]
+                    end
                 end
 
                 if game_state.cauldrons.d.content.name ~= nil then
