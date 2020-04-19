@@ -6,7 +6,8 @@ function Customer:new()
     local new_customer = {
         request = Request:new(),
         color = math.random(1),
-        served = false
+        served = false,
+        already_postponed = false
     }
     self.__index = self
     return setmetatable(new_customer, self)
