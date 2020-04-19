@@ -161,6 +161,7 @@ function love.load()
 
     help.store = love.graphics.newImage("Assets/Help/store_help.png")
     help.garden = love.graphics.newImage("Assets/Help/garden_help.png")
+    help.brewing = love.graphics.newImage("Assets/Help/brewing_help.png")
     help.big_message = love.graphics.newImage("Assets/big_message.png")
     help.small_message = love.graphics.newImage("Assets/small_message.png")
 
@@ -201,8 +202,8 @@ function love.load()
 end
 
 function love.update(delta)
-
---[[     if love.keyboard.isDown("p") then
+--[[ 
+    if love.keyboard.isDown("p") then
         love.graphics.captureScreenshot(os.time() .. ".png")
         love.event.quit()
     end ]]
@@ -559,7 +560,11 @@ function love.draw()
             love.graphics.print(HELP_GARDEN, 400, 35)
             love.graphics.setColor(1, 1, 1)
         elseif game_state.help.page == 4 then
-            love.graphics.print("BREW TODO!") 
+            love.graphics.draw(help.brewing)
+            love.graphics.draw(help.big_message, 150, 400)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print(HELP_BREWING, 155, 425)
+            love.graphics.setColor(1, 1, 1)
         end
         love.graphics.draw(help.small_message, 350, 580)
         love.graphics.setColor(0, 0, 0)
