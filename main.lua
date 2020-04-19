@@ -317,7 +317,7 @@ function love.update(delta)
     if not game_state.clock:is_open() and #game_state.customers > 0 then
         game_state.customers = {}
         message.message = "Shop closed"
-        message.expiration = 51000
+        message.expiration = 1.5
     end
 
     -- update garden times
@@ -707,6 +707,13 @@ function love.draw()
             love.graphics.draw(buy_cauldron, buy_cauldron_box.x, buy_cauldron_box.y, 0, 3, 3)
             love.graphics.draw(coin, buy_cauldron_box.x + 142, buy_cauldron_box.y + 15)
             love.graphics.print("New cauldron 10.000", buy_cauldron_box.x + 8, buy_cauldron_box.y + 12)
+        end
+
+        if not game_state.clock:is_open() then
+            love.graphics.draw(help.small_message, 350, 380)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print("Press space to skip\nto opening hours.", 365, 395)
+            love.graphics.setColor(1, 1, 1)
         end
 
     elseif game_state.current_location == "garden" then
