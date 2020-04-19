@@ -11,7 +11,11 @@ function Inventory:new()
         },
         money = 200,
         ingredients = {
-
+            spinach = 2,
+            coffee = 2,
+            cat_eyes = 2,
+            camel_hump = 2,
+            seaweed = 2
         },
         page = 1
     }

@@ -344,7 +344,11 @@ function draw_inventory()
         love.graphics.print(game_state.inventory:get_endurance(), 780, 472)
         love.graphics.print(game_state.inventory:get_underwater_breathing(), 690, 572)
     else -- inventory
-
+        love.graphics.draw(ingredients.spinach, 540, 375, 0, 3, 3)
+        love.graphics.draw(ingredients.coffee, 720, 375, 0, 3, 3)
+        love.graphics.draw(ingredients.cat_eyes, 540, 470, 0, 3, 3)
+        love.graphics.draw(ingredients.camel_hump, 720, 470, 0, 3, 3)
+        love.graphics.draw(ingredients.seaweed, 630, 560, 0, 3, 3)
     end
 end
 
