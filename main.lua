@@ -272,8 +272,19 @@ function love.update(delta)
                     for j = 1, num_y_plots do
                         if is_colliding({x=x, y=y}, garden_plots[i][j]) then
                             garden_plot_clicked = true
-                            game_state.garden_contents[i][j].name = selected_ingredient
-                            game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
+
+                            if game_state.garden_contents[i][j].name == nil then
+                                game_state.garden_contents[i][j].name = selected_ingredient
+                                game_state.garden_contents[i][j].time_left = ingredient_times[selected_ingredient]
+                            else
+                                if game_state.garden_contents[i][j].time_left == 0 then
+                                    selected_ingredient = nil
+                                    game_state.inventory:add_ingredient(game_state.garden_contents[i][j].name)
+                                    game_state.garden_contents[i][j] = {}
+                                end
+                            end
+
+
                         end
                     end
                 end
