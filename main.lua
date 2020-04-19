@@ -1,10 +1,12 @@
 require "inventory"
 require "customer"
+require "clock"
 
 local debug = false
 local next_action_allowed = 0
 
 local store
+local store_closed
 local witch_front
 local witch_back
 local garden
@@ -24,7 +26,7 @@ local game_state = {
     finished_customers = {},
     postponed_customers = {},
     paused = false,
-    clock = {10, 0},
+    clock = Clock:new(10, 18, 10, 0),
     queued_response = {
         accept = responses.accept[love.math.random(#responses.accept)],
         postpone = responses.postpone[love.math.random(#responses.postpone)],
@@ -47,6 +49,7 @@ local draw = function() end
 function love.load()
     love.graphics.setDefaultFilter( "nearest", "nearest")
     store = love.graphics.newImage("Assets/store.png")
+    store_closed = love.graphics.newImage("Assets/store_closed.png")
     witch_front = love.graphics.newImage("Assets/witch_front.png")
     witch_back = love.graphics.newImage("Assets/witch_back.png")
     response_bubble = love.graphics.newImage("Assets/response_bubble.png")
@@ -75,7 +78,12 @@ function love.update(delta)
     end
 
     local active_customer = game_state.customers[1] ~= nil
-    update()
+
+    if game_state.current_location == "store" or game_state.current_location == "garden" then
+        game_state.clock:update(delta)
+    end
+
+    print(game_state.clock:to_string())
 
     if game_state.current_location == "store" then
         if love.mouse.isDown("1") then
@@ -128,7 +136,11 @@ function love.draw()
     local active_customer = game_state.customers[1] ~= nil
 
     if game_state.current_location == "store" then
-        love.graphics.draw(store, 0, 0, 0, 3, 3)
+        if game_state.clock:is_open() then
+            love.graphics.draw(store, 0, 0, 0, 3, 3)
+        else
+            love.graphics.draw(store_closed, 0, 0, 0, 3, 3)
+        end
 
         for i = 1, #game_state.customers do
             local c = game_state.customers[i]
