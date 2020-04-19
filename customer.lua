@@ -7,7 +7,8 @@ function Customer:new()
         request = Request:new(),
         color = math.random(1),
         served = false,
-        already_postponed = false
+        already_postponed = false,
+        time_bonus = 50 + math.random(100)
     }
     self.__index = self
     return setmetatable(new_customer, self)

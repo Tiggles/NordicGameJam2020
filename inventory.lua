@@ -9,6 +9,7 @@ function Inventory:new()
             nightvision_potions = 1,
             endurance_potions = 1
         },
+        money = 200,
         ingredients = {
             spinach = 1,
             coffee = 1,
@@ -20,6 +21,18 @@ function Inventory:new()
     }
     self.__index = self
     return setmetatable(inventory, self)
+end
+
+function Inventory:add_money(amount)
+    self.money = self.money + math.floor(amount)
+end
+
+function Inventory:has_enough_money(to_spend)
+    return self.money >= to_spend
+end
+
+function Inventory:spend_money(amount)
+    self.money = math.max(self.money - amount, 0)
 end
 
 function Inventory:get_speed()
@@ -80,11 +93,11 @@ function Inventory:has_previous_page()
 end
 
 function Inventory:next_page()
-    self.page = self.page + 1
+    self.page = math.min(self.page + 1, 2)
 end
 
 function Inventory:previous_page()
-    self.page = self.page - 1
+    self.page = math.max(self.page - 1, 1)
 end
 
 function Inventory:use_potion(power)
