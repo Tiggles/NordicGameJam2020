@@ -7,10 +7,23 @@ local debug = false
 local next_action_allowed = 0
 local next_customer_allowed = math.random(6)
 
+local initial_height = 672
+local recipes = {
+    is_open = false,
+    max_y = initial_height * 0.3,
+    min_y = initial_height + 10,
+    y = initial_height + 10,
+    recipes = {
+        "Speed",
+        "Strength",
+        "Underwater Breathing",
+        "Night Vision",
+        "Endurance"
+    }
+}
+
 local store
 local store_closed
-local witch_front
-local witch_back
 local arrow_left
 local arrow_right
 local coin
@@ -84,7 +97,7 @@ potion_price["Speed"] = 400
 potion_price["Strength"] = 150
 potion_price["Underwater Breathing"] = 50
 potion_price["Night Vision"] = 1200
-potion_price["Endurance"] = 1500
+potion_price["Endurance"] = 2500
 
 local game_state = {
     help = Help:new(),
@@ -120,7 +133,6 @@ local game_state = {
 }
 
 local buy_cauldron_box = {x = 0, y = 528, width = 53 * 3, height = 14 * 3}
-
 local garden_plot_start_x = 236
 local garden_plot_start_y = 45
 local plot_width = 97
@@ -134,8 +146,8 @@ for i = 1, num_x_plots do
     garden_plots[i] = {}
     for j = 1, num_y_plots do
         garden_plots[i][j] = {
-            x = i*plot_width+garden_plot_start_x,
-            y = j*plot_height+garden_plot_start_y,
+            x = i * plot_width + garden_plot_start_x,
+            y = j * plot_height + garden_plot_start_y,
             width = plot_width,
             height = plot_height
         }
@@ -151,6 +163,7 @@ local inventory_right_box = {x = 805, y = 576, width = 17 * 3, height = 14 * 3}
 local accept_box = {x = 500, y = 100, width = 345, height = 55}
 local postpone_box = {x = 500, y = accept_box.y + accept_box.height + 15, width = 345, height = 55}
 local decline_box = {x = 500, y = postpone_box.y + postpone_box.height + 15, width = 345, height = 55}
+local open_recipes_button = {x = 300, y = 150, width = 160, height = 38}
 local goto_garden_button = {x = 700, y = 628, width = 160, height = 38}
 local goto_store_button = {x = 7, y = 628, width = 185, height = 38}
 
@@ -163,7 +176,7 @@ local seaweed_button_box = {x = 15, y = 295, width = 249, height = 60}
 local update = function() end
 local draw = function() end
 
-function has_ingredients(potion)
+local function has_ingredients(potion)
     for ingredient, needed_quantity in pairs(potion_ingredients[potion]) do
         if ingredient == "spinach" then
             if game_state.inventory:get_spinach() < needed_quantity then
@@ -191,7 +204,7 @@ function has_ingredients(potion)
     return true
 end
 
-function use_ingredients(potion)
+local function use_ingredients(potion)
     for ingredient, needed_quantity in pairs(potion_ingredients[potion]) do
         for i = 1, needed_quantity do
             game_state.inventory:use_ingredient(ingredient)
@@ -204,6 +217,7 @@ function love.load()
 
     love.graphics.setDefaultFilter( "nearest", "nearest")
     buy_cauldron = love.graphics.newImage("Assets/upgrade_box.png")
+    recipe_image = love.graphics.newImage("Assets/upgrade_box.png")
     store = love.graphics.newImage("Assets/store.png")
     menu_bg = love.graphics.newImage("Assets/menu_bg.png")
     cauldron_full = love.graphics.newImage("Assets/cauldron_full.png")
@@ -287,7 +301,6 @@ function love.update(delta)
         return
     end
 
-    -- if love.keyboard.isDown("escape") then love.event.quit() end
     if love.keyboard.isDown("f4") and next_action_allowed < love.timer.getTime() then
         debug = not debug
         next_action_allowed = love.timer.getTime() + 0.2
@@ -379,6 +392,13 @@ function love.update(delta)
 
 
     if game_state.current_location == "store" then
+        if recipes.is_open then
+            recipes.y = math.max(recipes.y - delta * 1800, recipes.max_y)
+        else
+            recipes.y = math.min(recipes.y + delta * 1800, recipes.min_y)
+        end
+
+
         if love.keyboard.isDown("escape") then
             game_state.current_location = "menu"
         end
@@ -408,6 +428,7 @@ function love.update(delta)
 
         if love.mouse.isDown("1") then
             local action_happened = false
+            local keep_recipes_open = false;
 
             if is_colliding({x = x, y = y}, buy_cauldron_box) then
                 if game_state.upgrades.cauldrons < 4  and next_action_allowed < love.timer.getTime() then
@@ -496,6 +517,14 @@ function love.update(delta)
                         game_state.cauldrons.d.content = {}
                     end
                 end
+            elseif is_colliding({x = x, y = y}, open_recipes_button) then
+                recipes.is_open = true
+                next_action_allowed = love.timer.getTime() + 0.2
+                keep_recipes_open = true
+            end
+
+            if keep_recipes_open == false then
+                recipes.is_open = false
             end
 
             if active_customer and next_action_allowed < love.timer.getTime() then
@@ -520,8 +549,6 @@ function love.update(delta)
                     table.remove(game_state.customers, 1)
                     action_happened = true
                     next_action_allowed = love.timer.getTime() + 0.2
-               else
-                    print("None")
                 end
 
                 if action_happened then
@@ -707,6 +734,7 @@ function love.draw()
         draw_conversation(active_customer)
         draw_inventory()
         draw_cauldrons()
+        draw_recipes()
 
         if game_state.upgrades.cauldrons < 4 then
             love.graphics.draw(buy_cauldron, buy_cauldron_box.x, buy_cauldron_box.y, 0, 3, 3)
@@ -719,6 +747,10 @@ function love.draw()
             love.graphics.setColor(0, 0, 0)
             love.graphics.print("Press space to skip\nto opening hours.", 365, 395)
             love.graphics.setColor(1, 1, 1)
+        end
+
+        if debug then
+            love.graphics.rectangle("line", open_recipes_button.x, open_recipes_button.y, open_recipes_button.width, open_recipes_button.height)
         end
 
     elseif game_state.current_location == "garden" then
@@ -760,6 +792,48 @@ function is_colliding(point, box)
     return point.x > box.x and point.x < box.width + box.x and point.y > box.y and point.y < box.y + box.height
 end
 
+function draw_recipes()
+    love.graphics.setColor(220 / 255, 208 / 255, 186 / 255)
+    love.graphics.rectangle("fill", 250, recipes.y, 400, 672)
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("Recipes for magic:", 260, recipes.y + 15)
+    -- Strength
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("2x", 400, recipes.y + 70)
+    love.graphics.print("=", 460, recipes.y + 70)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(ingredients.spinach, 420, recipes.y + 60, 0, 2, 2)
+    love.graphics.draw(potions.strength, 475, recipes.y + 60, 0, 2, 2)
+    -- Speed
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("2x", 400, recipes.y + 130)
+    love.graphics.print("=", 460, recipes.y + 130)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(ingredients.coffee, 420, recipes.y + 120, 0, 2, 2)
+    love.graphics.draw(potions.speed, 475, recipes.y + 120, 0, 2, 2)
+    -- Vision
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("2x", 400, recipes.y + 190)
+    love.graphics.print("=", 460, recipes.y + 190)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(ingredients.cat_eyes, 420, recipes.y + 180, 0, 2, 2)
+    love.graphics.draw(potions.nightvision, 475, recipes.y + 180, 0, 2, 2)
+    -- Endurance
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("2x", 400, recipes.y + 250)
+    love.graphics.print("=", 460, recipes.y + 250)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(ingredients.camel_hump, 420, recipes.y + 240, 0, 2, 2)
+    love.graphics.draw(potions.endurance, 475, recipes.y + 240, 0, 2, 2)
+    -- Breathing
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("2x", 400, recipes.y + 310)
+    love.graphics.print("=", 460, recipes.y + 310)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(ingredients.seaweed, 420, recipes.y + 300, 0, 2, 2)
+    love.graphics.draw(potions.underwater, 475, recipes.y + 300, 0, 2, 2)
+end
+
 function draw_inventory()
     if game_state.inventory:has_previous_page() then
         love.graphics.setColor(1, 1, 1)
@@ -784,10 +858,15 @@ function draw_inventory()
         love.graphics.draw(potions.endurance, potion_positions.endurance.x, potion_positions.endurance.y, 0, 3, 3)
         love.graphics.draw(potions.underwater, potion_positions.underwater.x, potion_positions.underwater.y, 0, 3, 3)
 
+        love.graphics.print("Strength", 590, 364)
         love.graphics.print("Quantity: "..game_state.inventory:get_strength(), 590, 382)
+        love.graphics.print("Speed", 770, 364)
         love.graphics.print("Quantity: "..game_state.inventory:get_speed(), 770, 382)
+        love.graphics.print("Vision", 590, 454)
         love.graphics.print("Quantity: "..game_state.inventory:get_nightvision(), 590, 472)
+        love.graphics.print("Endurance", 770, 454)
         love.graphics.print("Quantity: "..game_state.inventory:get_endurance(), 770, 472)
+        love.graphics.print("Breathing", 680, 554)
         love.graphics.print("Quantity: "..game_state.inventory:get_underwater_breathing(), 680, 572)
 
         love.graphics.draw(coin, 590, 402, 0, 2, 2)
@@ -823,6 +902,11 @@ end
 function draw_cauldrons()
     love.graphics.draw(cauldron_full, game_state.cauldrons.a.x, game_state.cauldrons.a.y, 0, 3, 3)
     love.graphics.draw(cauldron_full, game_state.cauldrons.b.x, game_state.cauldrons.b.y, 0, 3, 3)
+
+    love.graphics.setColor(1, 0, 1)
+    love.graphics.draw(recipe_image, open_recipes_button.x, open_recipes_button.y, 0, 3, 3)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("Recipes", open_recipes_button.x + 55, open_recipes_button.y + 12)
 
     if game_state.upgrades.cauldrons > 2 then
         love.graphics.draw(cauldron_full, game_state.cauldrons.c.x, game_state.cauldrons.c.y, 0, 3, 3)

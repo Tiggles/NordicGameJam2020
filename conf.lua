@@ -7,5 +7,5 @@ function love.conf(t)
     t.window.borderless = false
     t.window.vsync = 1
     t.window.highdpi = true
-    t.console = true -- For windows
+    -- t.console = true -- For windows
 end
